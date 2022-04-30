@@ -1,0 +1,4 @@
+releases
+.vscode
+__pycache__
+ffmpeg
