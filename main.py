@@ -1,15 +1,12 @@
 import sys
 import os
 import json
-from typing import final
 from PyQt5.QtCore import QThread, QUrl, Qt, QSettings, pyqtSignal, pyqtProperty
 from PyQt5.QtGui import QDragEnterEvent, QCloseEvent, QDropEvent, QIcon, QKeySequence,  QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QWidget, QSplashScreen,  QFileDialog
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from pydub import AudioSegment
-#from tempfile import TemporaryDirectory
-#from asar import AsarArchive
 
 
 class VetyShared(QWidget):
