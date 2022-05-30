@@ -1,11 +1,11 @@
 import sys
 import os
 import json
-from PyQt5.QtCore import QThread, QUrl, Qt, QSettings, pyqtSignal, pyqtProperty
-from PyQt5.QtGui import QDragEnterEvent, QCloseEvent, QDropEvent, QIcon, QKeySequence,  QPixmap
-from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QWidget, QSplashScreen,  QFileDialog
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import QThread, QUrl, Qt, QSettings, pyqtSignal, pyqtProperty
+from PyQt6.QtGui import QDragEnterEvent, QShortcut, QCloseEvent, QDropEvent, QIcon, QKeySequence,  QPixmap
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QSplashScreen,  QFileDialog
+from PyQt6.QtWebChannel import QWebChannel
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 from vetyCutter import cut_listen_file_simple
 
 vetyApp = {
@@ -95,7 +95,7 @@ class VetyMain(QWebEngineView):
         self.work.trigger.connect(self.display)
         self.settings = QSettings("VtDevTeam", "Vety")
         self.config = self.getConfig()
-        self.setContextMenuPolicy(Qt.NoContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, e: QDragEnterEvent) -> None:
@@ -205,7 +205,7 @@ class MainWindow(QMainWindow):
         # self.prev_pos = None
         self.setWindowTitle("{} v{}".format(
             vetyApp["name"], vetyApp["version"]))
-        self.resize(500, 700)
+        self.resize(450, 600)
         self.setWindowIcon(QIcon("./imgs/logo.ico"))
         """self.tempDir = TemporaryDirectory()
         with AsarArchive.open('vety.asar') as archive:
@@ -226,6 +226,7 @@ class MainWindow(QMainWindow):
                   self, self.playRateDown)
         QShortcut(QKeySequence(self.tr("Space")),
                   self, self.playChange)
+        
 
     def playRateUp(self):
         self.browser.page().runJavaScript("Vety.addRate(1)")
@@ -250,8 +251,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "imgs/start.png")))
-    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignHCenter |
-                       Qt.AlignBottom, Qt.black)
+    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignmentFlag.AlignHCenter |
+                       Qt.AlignmentFlag.AlignBottom, Qt.GlobalColor.black)
     splash.show()
     win = MainWindow()
     channel = QWebChannel()
@@ -260,4 +261,4 @@ if __name__ == '__main__':
     win.browser.page().setWebChannel(channel)
     win.show()
     splash.finish(win)
-    app.exit(app.exec_())
+    app.exit(app.exec())
