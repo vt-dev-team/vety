@@ -10,25 +10,10 @@ let Vety = new Vue({
     el: "#app",
     data: {
         app: {
-            name: 'vety',
-            version: 'v1.0.6',
-            author: 'yemaster',
-            updates: [{
-                version: 'v1.0.6',
-                details: [
-                    '提高了切割的精确度',
-                    '支持实时Update',
-                    '修复了部分Bug'
-                ]
-            }, {
-                version: 'v1.0.4',
-                details: [
-                    '支持历史记录',
-                    '还有个彩蛋',
-                    '更新了界面',
-                    '修复了部分Bug'
-                ]
-            }, ]
+            name: 'Project Name',
+            version: 'Project Version',
+            author: 'Project Author',
+            updates: []
         },
         unibody: "window",
         infos: {
@@ -37,7 +22,8 @@ let Vety = new Vue({
         config: {
             maxZero: 5,
             zeroNums: 3200,
-            primaryColor: 'primary'
+            primaryColor: 'primary',
+            standardFile: 'standard.vety'
         },
         ismax: false,
         loadText: "加载中",
@@ -48,10 +34,17 @@ let Vety = new Vue({
         isdragging: false,
         filename: "",
         vetyBridge: {},
-        materials: [],
+        playRates: [0.125, 0.25, 0.5, 1, 1.5, 2, 4, 8, 16],
+        nowRate: 3,
+        cutResult: {
+            special_modes: [],
+            materials: [],
+            raw: []
+        },
         nowTime: 0,
         allTime: 0,
         status: 0,
+        playerPercent: 0,
     },
     computed: {
         reverseRecentFiles() {
@@ -74,20 +67,11 @@ let Vety = new Vue({
         audioElement = document.getElementById("mainMusic")
         audioElement.addEventListener("timeupdate", () => {
             _t.nowTime = audioElement.currentTime
+            _t.playerPercent = _t.nowPercent()
             if (_t.allTime != audioElement.duration) {
                 _t.allTime = audioElement.duration
-                $('#progressSlider').slider({
-                    min: 0,
-                    max: _t.allTime,
-                    start: _t.nowTime,
-                    step: 0.01,
-                    onChange: function(p) {
-                        if (p != _t.nowTime)
-                            document.getElementById("mainMusic").currentTime = p
-                    }
-                })
             } else {
-                $('#progressSlider').slider('set value', _t.nowTime)
+                _t.$refs.playerSlider.changePercent(_t.playerPercent)
             }
         })
         $('.ui.accordion')
@@ -103,31 +87,28 @@ let Vety = new Vue({
             let p = e.currentTarget
             $('.vmenu .menuScroller').css('top', `${p.offsetTop+12.5}px`)
         })
-        $('.filemenu a.item').click((e) => {
-            let p = e.currentTarget
-            $('.filemenu .menuScroller').css('left', `${p.offsetLeft+34}px`)
-        })
+        $(".ui.dropdown.button").dropdown()
         audioElement.addEventListener("play", () => {
             _t.status = 1
         })
         audioElement.addEventListener("pause", () => {
-            _t.status = 0
-        })
-        $('#loaderProgress')
-            .progress({
-                duration: 100,
-                total: 100,
-                text: {
-                    active: '解析 {value}%'
-                }
-            });
-        $('#progressSlider')
-            .slider({
-                min: 0,
-                max: _t.allTime,
-                start: _t.nowTime,
-                step: 0.01
+                _t.status = 0
             })
+            /*$('#loaderProgress')
+                .progress({
+                    duration: 100,
+                    total: 100,
+                    text: {
+                        active: '解析 {value}%'
+                    }
+                });
+            $('#progressSlider')
+                .slider({
+                    min: 0,
+                    max: _t.allTime,
+                    start: _t.nowTime,
+                    step: 0.01
+                })*/
     },
     methods: {
         chatWithPyQt: function(c) {
@@ -135,47 +116,75 @@ let Vety = new Vue({
         },
         getMusicName: function(p) {
             if (this.useExperienceCutName) {
-                if (this.materials.length <= 16 || this.materials[0][0] > 35000)
-                    return this.info[p + 1]
+                if (this.materials[p].length >= 3)
+                    return this.materials[p][2]
                 else
                     return this.info[p]
             } else
                 return `音频${p + 1}`
         },
+        addRate: function(cont) {
+            let _t = this
+            _t.nowRate += cont
+            if (_t.nowRate < 0)
+                _t.nowRate = 0
+            if (_t.nowRate >= _t.playRates.length)
+                _t.nowRate = _t.playRates.length - 1
+            $("#mainMusic").get(0).playbackRate = _t.playRates[_t.nowRate]
+            $('body').toast({
+                class: 'info',
+                message: `${_t.playRates[_t.nowRate]}倍速`
+            });
+        },
         openFile: function(fn) {
             let _t = this
             _t.filename = fn
-            $('#loaderProgress').css("display", "block")
+                //$('#loaderProgress').css("display", "block")
             _t.isLoadingFile = true
             $("#loader").css("display", "block")
             $(() => {
-
                 $("#mainMusic").attr("src", fn)
                 let vety_audio = $("#mainMusic").get('0')
                 $("#mainMusic").get('0').pause()
                 _t.status = 0
+                _t.nowTime = 0
                 vety_audio.load()
             })
         },
-        loadMaterials: function(p) {
+        loadMaterial: function(p) {
             let _t = this
             let q = JSON.parse(p)
-            _t.materials.push(q)
+            _t.cutResult = {
+                special_modes: q.s,
+                materials: q.m,
+                raw: q.r
+            }
+            console.log(this.cutResult)
         },
         clearToLoad: function() {
-            this.materials = []
+            this.cutResult = {
+                special_modes: [],
+                materials: [],
+                raw: []
+            }
         },
         finishLoadFile: function() {
             this.isLoadingFile = false
-            setTimeout(function() {
-                $('#loaderProgress').fadeOut()
-            }, 500)
+                /*setTimeout(function() {
+                    $('#loaderProgress').fadeOut()
+                }, 500)*/
         },
         play: function() {
             document.getElementById("mainMusic").play()
         },
         stop: function() {
             document.getElementById("mainMusic").pause()
+        },
+        changeState: function() {
+            if (this.status === 0)
+                this.play()
+            else
+                this.stop()
         },
         playFrom: function(p) {
             document.getElementById("mainMusic").currentTime = p
@@ -203,6 +212,18 @@ let Vety = new Vue({
             for (let i in this.config)
                 this.config[i] = this.config[i]
             this.chatWithPyQt("update " + JSON.stringify(this.config))
+        },
+        changePercent: function(v) {
+            this.playFrom(this.allTime / 100 * v)
+        },
+        nowPercent() {
+            if (this.nowTime == 0)
+                return 0
+            else
+                return this.nowTime / this.allTime * 100
         }
+    },
+    components: {
+        vetyProgress
     }
 })

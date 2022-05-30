@@ -15,12 +15,18 @@
 
 <body>
     <div id="app">
-        <div class="ui active inverted dimmer" v-show="isloading">
-            <div class="ui text elastic loader">{{ loadText }}</div>
+        <div class="ui active inverted dimmer" v-show="isLoadingFile">
+            <div class="ui text elastic inline loader" :class="config.primaryColor">加载中</div>
         </div>
+        <!--div class="ui active inverted dimmer" v-show="isloading">
+            <div class="ui text elastic loader">{{ loadText }}</div>
+        </div-->
         <div class="ui left fixed vertical icon borderless menu vmenu" :class="config.primaryColor">
             <div class="menuScroller"></div>
             <a class="active item" data-tab='MainContent'>
+                <i class="home alternate icon"></i>
+            </a>
+            <a class="item" data-tab='ResContent'>
                 <i class="headphones alternate icon"></i>
             </a>
             <a class="item" data-tab='Laboratory'>
@@ -35,54 +41,46 @@
         </div>
         <div class="ui app" style="height: calc(100% - 120px);overflow-y: auto;">
             <div class='ui active tab' data-tab='MainContent'>
-                <div class="ui borderless menu filemenu">
-                    <div class="menuScroller"></div>
-                    <a class="item active" data-tab="fileList">文件列表</a>
-                    <a class="item" data-tab="parseList">解析列表</a>
-                    <a class="disabled item" data-tab="advancedSettings">高级配置</a>
+                <h1 class="page-title">Vety!</h1>
+                <h3 class="ui header">文件操作</h3>
+                <div class="ui fluid vertical menu" :class="config.primaryColor">
+                    <a class="item" @click="chatWithPyQt('open')">打开文件</a>
                 </div>
-
-                <div class='ui active tab' data-tab='fileList'>
-                    <h3 class="ui header">文件操作</h3>
-                    <div class="ui fluid vertical menu" :class="config.primaryColor">
-                        <a class="item" @click="chatWithPyQt('open')">打开文件</a>
-                    </div>
-                    <h3 class="ui header">最近文件</h3>
-                    <div class="ui fluid vertical menu" :class="config.primaryColor">
-                        <a class="item" v-for="rcf in reverseRecentFiles" @click="chatWithPyQt('open '+rcf)">
+                <h3 class="ui header">最近文件</h3>
+                <div class="ui fluid vertical menu" :class="config.primaryColor">
+                    <a class="item" v-for="rcf in reverseRecentFiles" @click="chatWithPyQt('open '+rcf)">
                             {{ rcf }}</a>
-                    </div>
-                </div>
-                <div class='ui tab' data-tab='parseList'>
-                    <h3 class="ui header">解析列表
-                        <div class="ui active elastic inline loader" v-if="isLoadingFile" :class="config.primaryColor"></div>
-                    </h3>
-                    <div class="ui indicating progress" id="loaderProgress" data-value="0" style="display:none">
-                        <div class="bar">
-                            <div class="progress"></div>
-                        </div>
-                    </div>
-                    <template v-if="filename.length > 0">
-                        {{ filename }}<br>
-                        <div class="ui slider checkbox">
-                            <input type="checkbox" v-model="useExperienceCutName">
-                            <label>使用经验给文段命名</label>
-                        </div>
-                        <div class="ui fluid vertical menu" :class="config.primaryColor">
-                            <a class="item" v-for="(m,d) in materials" @click="playFrom(m[0] / 1000)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000)}">
-                                {{ getMusicName(d) }}</a>
-                        </div>
-                    </template>
-                </div>
-                <div class='ui tab' data-tab='advancedSettings'>
-                    <h3 class="ui header">间隔适配</h3>
-                    <h3 class="ui header">材料标注</h3>
                 </div>
 
             </div>
+            <div class='ui tab' data-tab='ResContent'>
+                <h1 class="page-title">解析列表</h1>
+                <div class="ui indicating progress" id="loaderProgress" data-value="0" style="display:none">
+                    <div class="bar">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+                <div v-if="filename.length > 0">
+                    {{ filename }}<br> 特殊性质：
+                    <div class="ui horizontal label" v-for="(s_m,k) in cutResult.special_modes" v-bind:key="k">{{ s_m }}</div>
+                    <br>
+                    <div class="ui slider checkbox">
+                        <input type="checkbox" v-model="useExperienceCutName">
+                        <label>使用经验给文段命名</label>
+                    </div>
+                    <div class="ui fluid vertical menu" :class="config.primaryColor" v-if="useExperienceCutName">
+                        <a class="item" v-for="(m,d) in cutResult.materials" @click="playFrom(m[0] / 1000)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000)}">
+                                {{ m[2] }}</a>
+                    </div>
+                    <div class="ui fluid vertical menu" :class="config.primaryColor" v-else>
+                        <a class="item" v-for="(m,d) in cutResult.raw" @click="playFrom(m[0] / 1000)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000)}">
+                                {{ m[2] }}</a>
+                    </div>
+                </div>
+            </div>
             <div class='ui tab' data-tab='About'>
                 <h1 class="ui header">Vety!</h1>
-                当前版本：{{ app.version }}
+                当前版本：v{{ app.version }}
                 <br> Made By {{ app.author }} With
                 <font color="#db2828">♥</font>
                 <hr/>
@@ -113,11 +111,6 @@
                 <p>选择好文件之后，软件底部的播放器即可就绪。最下方三个按钮作用分别为回退5s，暂停/播放，前进5s。</p>
                 <p>选择好文件并且播放过音频之后，播放器的滑动条就绪，可以拖动或者点击选择进度。</p>
                 <p>切割好音频之后，解析结果将显示在主页(耳机按钮)-解析列表，用户可以根据需要点击材料进行播放。材料将根据播放进度用不同颜色显示，灰色表示已播放，蓝色表示进行中，黑色表示未播放。</p>
-                <p>未经过设置，切割后的材料将按照经验命名，相关代码如下。</p>
-                <pre class="ag" style="font-family:monospace;"><ol><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">let info = [&quot;提示语&quot;, &quot;第1段材料&quot;, &quot;第2段材料&quot;, &quot;第3段材料&quot;, &quot;第4段材料&quot;, &quot;第5段材料&quot;, &quot;提示语&quot;, &quot;第6段材料&quot;, &quot;提示语&quot;, &quot;第7段材料&quot;, &quot;提示语&quot;, &quot;第8段材料&quot;, &quot;提示语&quot;, &quot;第9段材料&quot;, &quot;提示语&quot;, &quot;第10段材料&quot;, &quot;提示语&quot;, &quot;提示语&quot;, &quot;提示语&quot;, &quot;提示语&quot;, &quot;提示语&quot;]</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">if (useExperienceCutName) {</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">    if (materials.length &gt; 35000)</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        return info[p + 1]</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">    else</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        return info[p]</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">} else</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">    return `音频${p + 1}`</div></li></ol></pre>
-                <h3>切分</h3>
-                <p>切分代码如下</p>
-                <pre class="python" style="font-family:monospace;"><ol><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;"><span style="color: #ff7700;font-weight:bold;">while</span> i <span style="color: #66cc66;">&lt;</span> duration:</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">    <span style="color: #ff7700;font-weight:bold;">if</span> qp<span style="color: black;">&#91;</span>i<span style="color: black;">&#93;</span>.<span style="color: black;">rms</span> <span style="color: #66cc66;">&lt;</span> <span style="color: #008000;">self</span>.<span style="color: black;">config</span><span style="color: black;">&#91;</span><span style="color: #483d8b;">&quot;maxZero&quot;</span><span style="color: black;">&#93;</span>:</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        <span style="color: #ff7700;font-weight:bold;">if</span> zeroNum <span style="color: #66cc66;">==</span> <span style="color: #ff4500;">0</span>:</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">            start <span style="color: #66cc66;">=</span> i</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        zeroNum +<span style="color: #66cc66;">=</span> <span style="color: #ff4500;">1</span></div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        i +<span style="color: #66cc66;">=</span> <span style="color: #ff4500;">1</span></div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">    <span style="color: #ff7700;font-weight:bold;">else</span>:</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        <span style="color: #ff7700;font-weight:bold;">if</span> zeroNum <span style="color: #66cc66;">&gt;</span> <span style="color: #008000;">self</span>.<span style="color: black;">config</span><span style="color: black;">&#91;</span><span style="color: #483d8b;">&quot;zeroNums&quot;</span><span style="color: black;">&#93;</span>:</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">            end <span style="color: #66cc66;">=</span> i</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">            <span style="color: #ff7700;font-weight:bold;">if</span> lastEnd <span style="color: #66cc66;">!=</span> -<span style="color: #ff4500;">1</span>:</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">                <span style="color: #008000;">self</span>.<span style="color: black;">trigger</span>.<span style="color: black;">emit</span><span style="color: black;">&#40;</span>json.<span style="color: black;">dumps</span><span style="color: black;">&#40;</span><span style="color: black;">&#40;</span>lastEnd<span style="color: #66cc66;">,</span> start<span style="color: black;">&#41;</span><span style="color: black;">&#41;</span><span style="color: black;">&#41;</span></div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">            lastEnd <span style="color: #66cc66;">=</span> end</div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        zeroNum <span style="color: #66cc66;">=</span> <span style="color: #ff4500;">0</span></div></li><li style="font-weight: normal; vertical-align:top;"><div style="font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;">        i +<span style="color: #66cc66;">=</span> <span style="color: #ff4500;">1</span></div></li></ol></pre>
                 <hr/>
                 <h2 id="mztk">免责条款</h2>
 
@@ -166,40 +159,43 @@
             <audio id="mainMusic" src="" type="audio/mp3" style="display: none" controls>
             </audio>
             <div class="player" style="height: 100px">
-                <div class="ui padded grid">
-                    <div class="left column" style="width: 70px">
+                <div style="display: flex;align-items: center; margin-bottom: 10px">
+                    <span style="margin-right: 5px;">
                         {{ formatSeconds(nowTime) }}
-                    </div>
-                    <div class="column" style="width: calc(100% - 150px)">
-                        <div class="ui small slider" :class="config.primaryColor" id="progressSlider"></div>
-                    </div>
-                    <div class="right column" style="width: 70px">
-                        {{ formatSeconds(allTime) }}
-                    </div>
-                </div>
-                <!--div>
-                                                <span>{{ nowTime }}</span>
-                                                <span>{{ allTime }}</span>
-                                            </div-->
+                    </span>
+                    <vety-progress :width='$(".c-progress").width()-30' ref="playerSlider" @perc="changePercent" style="width: 100%"></vety-progress>
 
-                <div style="text-align:center">
-                    <button class="ui circular basic icon button" @click="playAbsolute(-10)">
-                        <i class="step backward icon"></i>
-                    </button>
-                    <button class="ui circular basic icon button" :class="config.primaryColor" @click="play()" v-if="status == 0">
-                        <i class="play icon"></i>
-                    </button>
-                    <button class="ui circular basic icon button" :class="config.primaryColor" @click="stop()" v-else-if="status == 1">
-                        <i class="pause icon"></i>
-                    </button>
-                    <button class="ui circular basic icon button" @click="playAbsolute(10)">
-                        <i class="step forward icon"></i>
-                    </button>
+                    <span style="margin-left: 5px;">
+                        {{ formatSeconds(allTime) }}
+                    </span>
+                </div>
+                <div style="display: flex;align-items: center; width: 100%">
+                    <!--div width="100%">
+                        <button class="ui settings icon pointing dropdown button">
+                            <i class="volume up icon"></i>
+                            <vety-progress :width='100' class="menu"></vety-progress>
+                        </button>
+                    </div-->
+                    <div style="text-align:center; width: 100%">
+                        <button class=" ui circular basic icon button " @click="playAbsolute(-5) ">
+                            <i class="undo icon "></i>
+                        </button>
+                        <button class="ui circular basic icon button " :class="config.primaryColor " @click="play() " v-if="status==0 ">
+                            <i class="play icon "></i>
+                        </button>
+                        <button class="ui circular basic icon button " :class="config.primaryColor " @click="stop() " v-else-if="status==1 ">
+                            <i class="pause icon "></i>
+                        </button>
+                        <button class="ui circular basic icon button " @click="playAbsolute(5) ">
+                            <i class="redo icon "></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="./vety.js"></script>
+    <script src="./vety.progress.js "></script>
+    <script src="./vety.js "></script>
 </body>
 
 </html>

@@ -6,7 +6,29 @@ from PyQt5.QtGui import QDragEnterEvent, QCloseEvent, QDropEvent, QIcon, QKeySeq
 from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QWidget, QSplashScreen,  QFileDialog
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from pydub import AudioSegment
+from vetyCutter import cut_listen_file_simple
+
+vetyApp = {
+    "name": 'Vety',
+    "version": '1.2.0',
+    "author": 'yemaster',
+    "updates": [
+        {
+            "version": 'v1.2.0',
+            "details": [
+                '采用新的切分算法，更加准确',
+                '修改了部分界面',
+            ]
+        }, {
+            "version": 'v1.1.0',
+            "details": [
+                '采用数字标准分割文件，更加精确',
+                '更改了滑动条',
+                '修复了部分bug'
+            ]
+        }
+    ]
+}
 
 
 class VetyShared(QWidget):
@@ -26,6 +48,8 @@ class VetyShared(QWidget):
             else:
                 win.browser.openFile(p[1])
         elif p[0] == "preload":
+            win.browser.page().runJavaScript(
+                f"Vety.app = {json.dumps(vetyApp)}")
             if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
                 filePath = sys.argv[1].replace('\\', '/')
                 win.browser.openFile(filePath)
@@ -52,34 +76,12 @@ class VetyThread(QThread):
         super(VetyThread, self).__init__()
 
     def run(self):
+        print(self.fname)
         if self.fname and os.path.exists(self.fname):
             try:
-                self.trigger.emit("clear")
-                qp = AudioSegment.from_file(self.fname)
-                duration = len(qp)
-                zeroNum = 0
-                start = end = 0
-                i = 0
-                progress = 0
-                lastEnd = -1
-                while i < duration:
-                    if int((i + 1) * 20 / duration) * 5 > progress:
-                        progress = int((i + 1) * 20 / duration) * 5
-                        self.trigger.emit("progress " + str(progress))
-                    if qp[i].rms < self.config["maxZero"]:
-                        if zeroNum == 0:
-                            start = i
-                        zeroNum += 1
-                        i += 1
-                    else:
-                        if zeroNum > self.config["zeroNums"]:
-                            #print(i, zeroNum)
-                            end = i
-                            if lastEnd != -1:
-                                self.trigger.emit(json.dumps((lastEnd, start)))
-                            lastEnd = end
-                        zeroNum = 0
-                        i += 1
+                # self.trigger.emit("clear")
+                res = cut_listen_file_simple(self.fname, self.config["maxZero"], self.config["zeroNums"])
+                self.trigger.emit("Result {}".format(json.dumps(res)))
             except Exception as e:
                 self.trigger.emit("Error {}".format(e))
             finally:
@@ -115,12 +117,16 @@ class VetyMain(QWebEngineView):
             self.page().runJavaScript(
                 "$('body').toast({ class: 'error', message: \""+p[1]+"\" }); ")
             self.page().runJavaScript("Vety.clearToLoad()")
+        elif p[0] == "Result":
+            # print(p[1])
+            self.page().runJavaScript("Vety.loadMaterial('{}')".format(p[1]))
         elif p[0] == "clear":
             self.page().runJavaScript("Vety.clearToLoad()")
         elif p[0] == "finish":
             self.page().runJavaScript("Vety.finishLoadFile()")
         elif p[0] == "progress":
-            self.page().runJavaScript("$(\"#loaderProgress\").progress('set percent', " + p[1] + ")")
+            self.page().runJavaScript(
+                "$(\"#loaderProgress\").progress('set percent', " + p[1] + ")")
         else:
             self.page().runJavaScript("Vety.loadMaterials('{}')".format(st))
 
@@ -133,7 +139,8 @@ class VetyMain(QWebEngineView):
         if fname and os.path.exists(fname):
             self.addRecentFiles(fname)
             self.page().runJavaScript("Vety.openFile('{}');".format(fname))
-            self.page().runJavaScript("$(\"a[data-tab='parseList']\").click()")
+            self.page().runJavaScript(
+                "$(\"a[data-tab='ResContent']\").click()")
             self.work.fname = fname
             self.work.config = self.config
             self.work.start()
@@ -172,10 +179,13 @@ class VetyMain(QWebEngineView):
             zeroNums = self.settings.value('Config/zeroNums') or 4950
             primaryColor = self.settings.value(
                 'Config/primaryColor') or 'primary'
+            standardFile = self.settings.value(
+                'Config/standardFile') or 'standards/standard.vety'
             return {
                 "maxZero": maxZero,
                 "zeroNums": zeroNums,
-                "primaryColor": primaryColor
+                "primaryColor": primaryColor,
+                "standardFile": standardFile
             }
         else:
             if key == "maxZero":
@@ -184,15 +194,18 @@ class VetyMain(QWebEngineView):
                 return self.settings.value('Config/zeroNums') or 4950
             elif key == "primaryColor":
                 return self.settings.value('Config/primaryColor') or 'primary'
+            elif key == "standardFile":
+                return self.settings.value(
+                    'Config/standardFile') or 'standards/standard.vety'
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         # self.prev_pos = None
-        self.setWindowOpacity(0.97)
-        self.setWindowTitle('Vety')
-        self.resize(500, 600)
+        self.setWindowTitle("{} v{}".format(
+            vetyApp["name"], vetyApp["version"]))
+        self.resize(500, 700)
         self.setWindowIcon(QIcon("./imgs/logo.ico"))
         """self.tempDir = TemporaryDirectory()
         with AsarArchive.open('vety.asar') as archive:
@@ -208,6 +221,20 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.browser)
 
         QShortcut(QKeySequence(self.tr("Ctrl+O")), self, self.openFile)
+        QShortcut(QKeySequence(self.tr("Ctrl+Shift+F")), self, self.playRateUp)
+        QShortcut(QKeySequence(self.tr("Ctrl+Shift+L")),
+                  self, self.playRateDown)
+        QShortcut(QKeySequence(self.tr("Space")),
+                  self, self.playChange)
+
+    def playRateUp(self):
+        self.browser.page().runJavaScript("Vety.addRate(1)")
+
+    def playRateDown(self):
+        self.browser.page().runJavaScript("Vety.addRate(-1)")
+
+    def playChange(self):
+        self.browser.page().runJavaScript("Vety.changeState()")
 
     def openFile(self):
         self.browser.openFile()
@@ -217,13 +244,13 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
+    #os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
     os.environ['path'] = os.path.join(os.path.dirname(
         __file__), "ffmpeg/bin/") + ";" + os.environ['path']
     app = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "imgs/start.png")))
-    splash.showMessage("Vety 1.0.6", Qt.AlignHCenter |
+    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignHCenter |
                        Qt.AlignBottom, Qt.black)
     splash.show()
     win = MainWindow()

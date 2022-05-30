@@ -10,6 +10,7 @@ body,
     margin: 0;
     padding: 0;
     overflow: hidden;
+    user-select: none;
 }
 
 ::-webkit-scrollbar {
@@ -57,7 +58,8 @@ body,
 
 .vmenu {
     transition: all .2s;
-    background-color: #f2f2f2 !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(160deg, #f0f4f8, #f0f3ed) !important;
     border-color: #ddd !important;
     box-shadow: none;
 }
@@ -76,44 +78,9 @@ body,
     color: #888888 !important;
 }
 
-.vmenu .item::after {
-    content: "";
-    position: absolute;
-    height: 16px;
-    top: 50%;
-    animation: menuLeave .2s;
-    transform: translateY(-50%);
-    left: 7px;
-    width: 3px;
-    border-radius: 3px;
-    transition: all .2s;
-}
-
-@keyframes menuEnter {
-    0% {
-        top: -16px;
-    }
-    100% {
-        top: 50%;
-    }
-}
-
-@keyframes menuLeave {
-    0% {
-        top: 50%;
-    }
-    100% {
-        top: calc(100% + 16px);
-    }
-}
-
 .app {
     margin-left: 52px;
     padding: 14px 36px;
-}
-
-.topbar {
-    width: 100%;
 }
 
 .nofileinfo {
@@ -168,7 +135,7 @@ h4 {
     position: absolute;
     border-radius: 10px;
     background-color: #2185d0;
-    transition: all 1s cubic-bezier(0.9, -0.6, 0.1, 1.6);
+    transition: all .8s cubic-bezier(0.95, 0.1, 0.05, 0.9);
     z-index: 200;
 }
 
@@ -185,4 +152,51 @@ h4 {
 
 .menu .item.grey {
     color: #888888 !important;
+}
+
+.c-progress {
+    display: flex;
+    align-items: center;
+}
+
+.c-progress span {
+    margin-left: 5px;
+    font-size: 14px;
+    color: #666;
+}
+
+.c-progress .c-progress-outer {
+    height: 5px;
+    border-radius: 5px;
+    background: #ebeef5;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.c-progress .c-progress-outer .c-progress-inner {
+    width: 100px;
+    height: 5px;
+    background: #2185d0;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px #2185d040;
+}
+
+.c-progress .c-progress-outer .c-progress-slider {
+    width: 20px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #2185d0;
+    position: absolute;
+    z-index: 10;
+    left: 10px;
+}
+
+.ui.settings.button {
+    background-color: transparent;
+}
+
+.ui.settings.button:hover {
+    background-color: #fafafa;
 }

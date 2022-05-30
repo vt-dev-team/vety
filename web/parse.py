@@ -1,5 +1,4 @@
 from pydub import AudioSegment
-from pydub.silence import detect_nonsilent
 import os
 import time
 os.environ['path'] = os.path.join(os.path.dirname(
