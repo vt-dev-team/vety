@@ -1,11 +1,5 @@
 let isLoading = true
 
-$(document).ready(function() {
-    $(".winbar").css('left', $(".vmenu").outerWidth() + 'px')
-    $(".winbar").css('right', '0px')
-    $(".winbar").css('width', 'auto')
-})
-
 let Vety = new Vue({
     el: "#app",
     data: {
@@ -15,6 +9,12 @@ let Vety = new Vue({
             author: 'Project Author',
             updates: []
         },
+        usefulWords: [
+            "小提示：Ctrl+Shift+F/L可以倍速播放",
+            "小提示：空格可以暂停/播放",
+            "小提示：Ctrl+O可以快速打开文件",
+            "Nothing brave, nothing have.", "No one can call back yesterday.", "No rose without a thorn.", "Not to advance is to go back.", "Nothing in the world is difficult for one who sets his mind to it.", "No way is impossible to courage.", "No man can do two things at once.", "No man is born wise or learned.", "No man is content.", "No man is wise at all times.", "None are so blind as those who won’t see.", "None are so deaf as those who won’t hear.", "No news is good news.", "No cross, no crown.", "No pains, no gains.", "No pleasure without pain.", "New wine in old bottles.", "No sweet without sweat.", "No smoke without fire.", "Never too old to learn, never too late to turn.", "Nothing dries sooner than a tear.", "No garden without its weeds.", "Nothing is difficult to the man who will try.", "Nothing seek, nothing find.", "Nothing is so necessary for travelers as languages.", "Nothing is to be got without pains but poverty.", "Never say die.", "Not to know what happened before one was born is always to be a child.", "No living man all things can.", "Obedience is the first duty of a soldier.", "Observation is the best teacher.", "Offense is the best defense.", "Old friends and old wines are best.", "Old sin makes new shame.", "Once a man and twice a child.", "Once a thief, always a thief.", "Once bitten, twice shy.", "One boy is a boy, two boys half a boy, three boys no boy.", "One cannot put back the clock.", "One eyewitness is better than ten hearsays.", "One false move may lose the game.", "One good turn deserves another.", "One hour today is worth two tomorrow.", "One man’s fault is other man’s lesson.", "One never loses anything by politeness.", "One swallow does not make a summer.", "One’s words reflect one’s thinking.", "Out of debt, out of danger.", "Out of office, out of danger.", "Out of sight, out of mind.", "Patience is the best remedy.", "Penny wise, pound foolish.", "Plain dealing is praised more than practiced.", "Please the eye and plague the heart.", "Pleasure comes through toil.", "Pour water into a sieve.", "Practice makes perfect.", "Praise is not pudding.", "Praise makes good men better, and bad men worse.", "Prefer loss to unjust gain.", "Prevention is better than cure.", "Pride goes before, and shame comes after.", "Promise is debt.", "Proverbs are the daughters of daily experience.", "Pull the chestnut out of fire.", "Put the cart before the horse.", "Put your shoulder to the wheel.", "Reading enriches the mind.", "Reading is to the mind while exercise to the body.", "Respect yourself, or no one else will respect you.", "Rome is not built in a day.", "Saying is one thing and doing another.", "Seeing is believing.", "Seek the truth from facts.", "Send a wise man on an errand, and say nothing to him.", "Set a thief to catch a thief.", "He is not fit to command others that cannot command himself.", "Something is better than nothing.", "He is wise that is honest.", "Soon ripe, soon rotten.", "Speech is silver, silence is gold.", "Still water run deep.", "Strike the iron while it is hot.", "Success belongs to the persevering.", "Take things as they come.", "Talking mends no holes.", "Talk of the devil and he will appear.", "Hasty love, soon cold.", "Health is better than wealth.", "Health is happiness.", "Hear all parties.", "He knows most who speaks least", "He is a fool that forgets himself.", "He is a good friend that speaks well of us behind our backs.", "He is a wise man who speaks little.", "He is lifeless that is faultless.", "Short accounts make long friends.", "He is not laughed at that laughs at himself first.", "Soon learn, soon forgotten.", "Heaven never helps the man who will not act."
+        ],
         unibody: "window",
         infos: {
             recentFiles: []
@@ -28,7 +28,6 @@ let Vety = new Vue({
         ismax: false,
         loadText: "加载中",
         useExperienceCutName: true,
-        info: ["提示语", "第1段材料", "第2段材料", "第3段材料", "第4段材料", "第5段材料", "提示语", "第6段材料", "提示语", "第7段材料", "提示语", "第8段材料", "提示语", "第9段材料", "提示语", "第10段材料", "提示语", "提示语", "提示语", "提示语", "提示语"],
         isloading: true,
         isLoadingFile: false,
         isdragging: false,
@@ -45,6 +44,7 @@ let Vety = new Vue({
         allTime: 0,
         status: 0,
         playerPercent: 0,
+        chooseEle: 0
     },
     computed: {
         reverseRecentFiles() {
@@ -53,8 +53,6 @@ let Vety = new Vue({
     },
     mounted: function() {
         let _t = this
-            /*if (preload)
-                _t.loadMaterials(preload)*/
         _t.isloading = false
         document.addEventListener("DOMContentLoaded", () => {
             new QWebChannel(qt.webChannelTransport, (c) => {
@@ -66,13 +64,19 @@ let Vety = new Vue({
         })
         audioElement = document.getElementById("mainMusic")
         audioElement.addEventListener("timeupdate", () => {
-            _t.nowTime = audioElement.currentTime
-            _t.playerPercent = _t.nowPercent()
-            if (_t.allTime != audioElement.duration) {
-                _t.allTime = audioElement.duration
-            } else {
-                _t.$refs.playerSlider.changePercent(_t.playerPercent)
-            }
+                _t.nowTime = audioElement.currentTime
+                _t.playerPercent = _t.nowPercent()
+                if (_t.allTime != audioElement.duration) {
+                    _t.allTime = audioElement.duration
+                } else {
+                    _t.$refs.playerSlider.changePercent(_t.playerPercent)
+                }
+            })
+            //document.documentElement.oncontextmenu = function(e) {
+            //}
+        document.addEventListener("click", function() {
+            let rm = document.getElementById("rightMenu")
+            rm.style.display = "none"
         })
         $('.ui.accordion')
             .accordion()
@@ -92,23 +96,10 @@ let Vety = new Vue({
             _t.status = 1
         })
         audioElement.addEventListener("pause", () => {
-                _t.status = 0
-            })
-            /*$('#loaderProgress')
-                .progress({
-                    duration: 100,
-                    total: 100,
-                    text: {
-                        active: '解析 {value}%'
-                    }
-                });
-            $('#progressSlider')
-                .slider({
-                    min: 0,
-                    max: _t.allTime,
-                    start: _t.nowTime,
-                    step: 0.01
-                })*/
+            _t.status = 0
+        })
+        setInterval(function() { _t.loadText = _t.usefulWords[Math.floor(Math.random() * _t.usefulWords.length)] }, 3000)
+        _t.loadText = _t.usefulWords[Math.floor(Math.random() * 3)]
     },
     methods: {
         chatWithPyQt: function(c) {
@@ -170,9 +161,6 @@ let Vety = new Vue({
         },
         finishLoadFile: function() {
             this.isLoadingFile = false
-                /*setTimeout(function() {
-                    $('#loaderProgress').fadeOut()
-                }, 500)*/
         },
         play: function() {
             document.getElementById("mainMusic").play()
@@ -221,6 +209,30 @@ let Vety = new Vue({
                 return 0
             else
                 return this.nowTime / this.allTime * 100
+        },
+        showContextMenu(q, e) {
+            let _t = this
+            _t.chooseEle = q
+            let rm = document.getElementById("rightMenu")
+            rm.style.display = "block"
+            let mx = e.clientX;
+            let my = e.clientY;
+            let rmWidth = rm.offsetWidth;
+            let rmHeight = rm.offsetHeight;
+            let pageWidth = document.documentElement.clientWidth;
+            let pageHeight = document.documentElement.clientHeight - 100;
+            if ((mx + rmWidth) < pageWidth)
+                rm.style.left = mx + "px";
+            else
+                rm.style.left = mx - rmWidth + "px";
+            if ((my + rmHeight) < pageHeight)
+                rm.style.top = my + "px";
+            else
+                rm.style.top = my - rmHeight + "px";
+            return false;
+        },
+        exportMp3(q) {
+            this.chatWithPyQt(`export ${this.cutResult.materials[q][0]} ${this.cutResult.materials[q][1]}`)
         }
     },
     components: {

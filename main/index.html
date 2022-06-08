@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.2, minimum-scale=1, maximum-scale=1">
     <title>Vety</title>
     <link rel="stylesheet" type="text/css" href="./statics/semantic.min.css">
-    <link rel="stylesheet" type="text/css" href="./vety.css?ver=3">
+    <link rel="stylesheet" type="text/css" href="./vety.css">
     <script src="./statics/jquery.min.js"></script>
     <script src="./statics/semantic.min.js"></script>
     <script src="./statics/qwebchannel.js"></script>
@@ -16,11 +16,14 @@
 <body>
     <div id="app">
         <div class="ui active inverted dimmer" v-show="isLoadingFile">
-            <div class="ui text elastic inline loader" :class="config.primaryColor">加载中</div>
+            <div class="ui text elastic inline loader" :class="config.primaryColor">{{ loadText }}</div>
         </div>
-        <!--div class="ui active inverted dimmer" v-show="isloading">
-            <div class="ui text elastic loader">{{ loadText }}</div>
-        </div-->
+        <div class="vRightMenu" id="rightMenu">
+            <ul>
+                <li><a href="javascript:;" @click="playFrom(cutResult.materials[chooseEle][0] / 1000)">播放</a></li>
+                <li><a href="javascript:;" @click="exportMp3(chooseEle)">导出为mp3</a></li>
+            </ul>
+        </div>
         <div class="ui left fixed vertical icon borderless menu vmenu" :class="config.primaryColor">
             <div class="menuScroller"></div>
             <a class="active item" data-tab='MainContent'>
@@ -29,9 +32,6 @@
             <a class="item" data-tab='ResContent'>
                 <i class="headphones alternate icon"></i>
             </a>
-            <a class="item" data-tab='Laboratory'>
-                <i class="flask icon"></i>
-            </a>
             <a class="item" data-tab='Settings'>
                 <i class="cog icon"></i>
             </a>
@@ -39,7 +39,7 @@
                 <i class="info alternate icon"></i>
             </a>
         </div>
-        <div class="ui app" style="height: calc(100% - 120px);overflow-y: auto;">
+        <div class="ui app" style="height: calc(100% - 100px);overflow-y: auto;">
             <div class='ui active tab' data-tab='MainContent'>
                 <h1 class="page-title">Vety!</h1>
                 <h3 class="ui header">文件操作</h3>
@@ -51,25 +51,37 @@
                     <a class="item" v-for="rcf in reverseRecentFiles" @click="chatWithPyQt('open '+rcf)">
                             {{ rcf }}</a>
                 </div>
-
             </div>
             <div class='ui tab' data-tab='ResContent'>
                 <h1 class="page-title">解析列表</h1>
-                <div class="ui indicating progress" id="loaderProgress" data-value="0" style="display:none">
-                    <div class="bar">
-                        <div class="progress"></div>
-                    </div>
-                </div>
                 <div v-if="filename.length > 0">
-                    {{ filename }}<br> 特殊性质：
-                    <div class="ui horizontal label" v-for="(s_m,k) in cutResult.special_modes" v-bind:key="k">{{ s_m }}</div>
-                    <br>
-                    <div class="ui slider checkbox">
-                        <input type="checkbox" v-model="useExperienceCutName">
-                        <label>使用经验给文段命名</label>
-                    </div>
+                    <table class="ui very basic celled table">
+                        <tbody>
+                            <tr>
+                                <th width="2">文件名</th>
+                                <td width="8">
+                                    {{ filename }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>特殊性质</th>
+                                <td>
+                                    <div class="ui horizontal label" v-for="(s_m,k) in cutResult.special_modes" v-bind:key="k">{{ s_m }}</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>操作</th>
+                                <td>
+                                    <div class="ui slider checkbox">
+                                        <input type="checkbox" v-model="useExperienceCutName">
+                                        <label>使用经验给文段命名</label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <div class="ui fluid vertical menu" :class="config.primaryColor" v-if="useExperienceCutName">
-                        <a class="item" v-for="(m,d) in cutResult.materials" @click="playFrom(m[0] / 1000)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000)}">
+                        <a class="item" v-for="(m,d) in cutResult.materials" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000), choosed: d == chooseEle}">
                                 {{ m[2] }}</a>
                     </div>
                     <div class="ui fluid vertical menu" :class="config.primaryColor" v-else>
@@ -77,9 +89,12 @@
                                 {{ m[2] }}</a>
                     </div>
                 </div>
+                <div v-else>
+                    暂无解析
+                </div>
             </div>
             <div class='ui tab' data-tab='About'>
-                <h1 class="ui header">Vety!</h1>
+                <h1 class="page-title">Vety!</h1>
                 当前版本：v{{ app.version }}
                 <br> Made By {{ app.author }} With
                 <font color="#db2828">♥</font>
@@ -88,7 +103,7 @@
                 <ol>
                     <li><a href="#updateLog">更新日志</a></li>
                     <li><a href="#tutorial">使用说明</a></li>
-                    <li><a href="#mztk">免责条款</a></li>
+                    <li><a href="#mztk">使用须知</a></li>
                 </ol>
                 <h2 id="updateLog">更新日志</h2>
                 <div class="ui divided items">
@@ -113,12 +128,9 @@
                 <p>切割好音频之后，解析结果将显示在主页(耳机按钮)-解析列表，用户可以根据需要点击材料进行播放。材料将根据播放进度用不同颜色显示，灰色表示已播放，蓝色表示进行中，黑色表示未播放。</p>
                 <hr/>
                 <h2 id="mztk">免责条款</h2>
-
+                <p>Vety的源代码可以在
+                    <a href="https://github.com/vt-dev-team/vety" target="_blank">https://github.com/vt-dev-team/vety</a>上获取，采用GPL v2开源</p>
             </div>
-            <div class='ui tab' data-tab='Laboratory'>
-                <h1 class="page-title">实验室</h1>
-            </div>
-
             <div class='ui tab' data-tab='Settings'>
                 <h1 class="page-title">设置</h1>
                 <div class="ui form">
@@ -169,27 +181,19 @@
                         {{ formatSeconds(allTime) }}
                     </span>
                 </div>
-                <div style="display: flex;align-items: center; width: 100%">
-                    <!--div width="100%">
-                        <button class="ui settings icon pointing dropdown button">
-                            <i class="volume up icon"></i>
-                            <vety-progress :width='100' class="menu"></vety-progress>
-                        </button>
-                    </div-->
-                    <div style="text-align:center; width: 100%">
-                        <button class=" ui circular basic icon button " @click="playAbsolute(-5) ">
+                <div style="text-align:center; width: 100%">
+                    <button class=" ui circular basic icon button " @click="playAbsolute(-5) ">
                             <i class="undo icon "></i>
                         </button>
-                        <button class="ui circular basic icon button " :class="config.primaryColor " @click="play() " v-if="status==0 ">
+                    <button class="ui circular basic icon button " :class="config.primaryColor " @click="play() " v-if="status==0 ">
                             <i class="play icon "></i>
                         </button>
-                        <button class="ui circular basic icon button " :class="config.primaryColor " @click="stop() " v-else-if="status==1 ">
+                    <button class="ui circular basic icon button " :class="config.primaryColor " @click="stop() " v-else-if="status==1 ">
                             <i class="pause icon "></i>
                         </button>
-                        <button class="ui circular basic icon button " @click="playAbsolute(5) ">
+                    <button class="ui circular basic icon button " @click="playAbsolute(5) ">
                             <i class="redo icon "></i>
                         </button>
-                    </div>
                 </div>
             </div>
         </div>

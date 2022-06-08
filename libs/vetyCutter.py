@@ -1,3 +1,4 @@
+from logging.config import listen
 from pydub import AudioSegment
 import os
 import time
@@ -128,7 +129,7 @@ def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min
         ret["blanks"].append(blanks[i])
 
     if len(ret["blanks"]) == 0:
-        return ret
+        return ret, listen_file
 
     material_point = 0
     material_count2 = 0
@@ -209,18 +210,18 @@ def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min
         "end": duration,
         "name": "提示语"
     })
-    return ret
+    return ret, listen_file
     # print(special_modes)
 
 
 def cut_listen_file_simple(file: str, max_zero: int = 10, min_num: int = 4200) -> dict:
-    k = cut_listen_file(file, max_zero, min_num)
+    k, l = cut_listen_file(file, max_zero, min_num)
     res = {
         "s": k["special_modes"],
         "m": [[x["start"], x["end"], x["name"]] for x in k["materials"]],
         "r": [[x["start"], x["end"], x["name"]] for x in k["raw_materials"]]
     }
-    return res
+    return res, l
 
 
 if __name__ == "__main__":

@@ -89,7 +89,6 @@ let vetyProgress = Vue.component('vety-progress', {
             let isClickSlider = false
             let distance = 0 // 滑块与点击坐标的绝对距离
             progress.onclick = (e) => {
-                // 阻止事件冒泡
                 if (e.target == slider) {
                     return
                 }
@@ -106,20 +105,31 @@ let vetyProgress = Vue.component('vety-progress', {
             slider.onmousedown = (e) => {
                 isClickSlider = true
                 let curX = slider.offsetLeft
-                distance = e.pageX - curX // 得出绝对距离
+                distance = e.pageX - curX
             }
             document.onmousemove = (e) => {
+                e = e || window.event;
                 if (isClickSlider) {
-                    // 判断是否已经超出进度条的长度
                     if ((e.pageX - distance) >= 0 && (e.pageX - distance) <= (this.width - 0)) {
                         this.sliderLeft = e.pageX - distance
                         this._countCurPercent()
                     }
                 }
             }
-            document.onmouseup = () => {
+
+            /*document.addEventListener("mousemove", function(e) {
+                console.log(e)
+                e = e || window.event;
+                if (isClickSlider) {
+                    if ((e.pageX - distance) >= 0 && (e.pageX - distance) <= (this.width - 0)) {
+                        this.sliderLeft = e.pageX - distance
+                        this._countCurPercent()
+                    }
+                }
+            })*/
+            document.addEventListener("mouseup", function() {
                 isClickSlider = false
-            }
+            })
         },
         changePercent(q) {
             //this.$emit('percentChange', q)

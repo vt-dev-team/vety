@@ -1,35 +1,36 @@
+from pickle import GLOBAL
 import sys
 import os
 import json
-from PyQt5.QtCore import QThread, QUrl, Qt, QSettings, pyqtSignal, pyqtProperty
-from PyQt5.QtGui import QDragEnterEvent, QCloseEvent, QDropEvent, QIcon, QKeySequence,  QPixmap
-from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QWidget, QSplashScreen,  QFileDialog
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from vetyCutter import cut_listen_file_simple
+from PySide6.QtCore import QThread, QUrl, Qt, QSettings, Property, Signal
+from PySide6.QtGui import QDragEnterEvent, QShortcut, QDropEvent, QIcon, QKeySequence,  QPixmap
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QSplashScreen,  QFileDialog, QGraphicsDropShadowEffect
+from PySide6.QtWebChannel import QWebChannel
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from libs.vetyCutter import cut_listen_file_simple
 
 vetyApp = {
     "name": 'Vety',
-    "version": '1.2.0',
+    "version": '1.2.2',
     "author": 'yemaster',
     "updates": [
+        {
+            "version": 'v1.2.2',
+            "details": [
+                '添加了导出功能'
+            ]
+        },
         {
             "version": 'v1.2.0',
             "details": [
                 '采用新的切分算法，更加准确',
                 '修改了部分界面',
             ]
-        }, {
-            "version": 'v1.1.0',
-            "details": [
-                '采用数字标准分割文件，更加精确',
-                '更改了滑动条',
-                '修复了部分bug'
-            ]
         }
     ]
 }
 
+lis = None
 
 class VetyShared(QWidget):
     def __init__(self):
@@ -64,11 +65,17 @@ class VetyShared(QWidget):
                 q = win.browser.config
                 win.browser.page().runJavaScript(
                     f"Vety.config = {json.dumps(q)}")
-    value = pyqtProperty(str, fget=PyQt52WebValue, fset=Web2PyQt5Value)
-
+        elif p[0] == "export":
+            if not lis is None:
+                fn = QFileDialog.getSaveFileName(win, "保存mp3文件", './', 'mp3文件(*.mp3);;全部文件(*)')[0]
+                try:
+                    lis[int(allP[1]):int(allP[2])+1].export(fn, format="mp3")
+                except Exception as e:
+                    print("Error", e)
+    value = Property(str, fget=PyQt52WebValue, fset=Web2PyQt5Value)
 
 class VetyThread(QThread):
-    trigger = pyqtSignal(str)
+    trigger = Signal(str)
     config = {}
     fname = ""
 
@@ -79,8 +86,9 @@ class VetyThread(QThread):
         print(self.fname)
         if self.fname and os.path.exists(self.fname):
             try:
-                # self.trigger.emit("clear")
-                res = cut_listen_file_simple(self.fname, self.config["maxZero"], self.config["zeroNums"])
+                global lis
+                res, lis = cut_listen_file_simple(
+                    self.fname, self.config["maxZero"], self.config["zeroNums"])
                 self.trigger.emit("Result {}".format(json.dumps(res)))
             except Exception as e:
                 self.trigger.emit("Error {}".format(e))
@@ -95,7 +103,7 @@ class VetyMain(QWebEngineView):
         self.work.trigger.connect(self.display)
         self.settings = QSettings("VtDevTeam", "Vety")
         self.config = self.getConfig()
-        self.setContextMenuPolicy(Qt.NoContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, e: QDragEnterEvent) -> None:
@@ -205,8 +213,15 @@ class MainWindow(QMainWindow):
         # self.prev_pos = None
         self.setWindowTitle("{} v{}".format(
             vetyApp["name"], vetyApp["version"]))
-        self.resize(500, 700)
-        self.setWindowIcon(QIcon("./imgs/logo.ico"))
+        self.resize(450, 600)
+        self.setWindowIcon(QIcon(os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "main/imgs/logo.ico")))
+        #self.effectShadow = QGraphicsDropShadowEffect(self)
+        #self.effectShadow.setOffset(0, 0)
+        #self.effectShadow.setBlurRadius(10)
+        #self.effectShadow.setColor(Qt.GlobalColor.gray)
+        #self.setGraphicsEffect(self.effectShadow)
+        #self.setWindowFlag(Qt.FramelessWindowHint)
         """self.tempDir = TemporaryDirectory()
         with AsarArchive.open('vety.asar') as archive:
             with self.tempDir as f:
@@ -217,7 +232,7 @@ class MainWindow(QMainWindow):
 
         self.browser = VetyMain()
         self.browser.load(QUrl.fromLocalFile(os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "web/index.html")))
+            os.path.dirname(os.path.abspath(__file__)), "main/index.html")))
         self.setCentralWidget(self.browser)
 
         QShortcut(QKeySequence(self.tr("Ctrl+O")), self, self.openFile)
@@ -244,14 +259,14 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    #os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
+    os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
     os.environ['path'] = os.path.join(os.path.dirname(
         __file__), "ffmpeg/bin/") + ";" + os.environ['path']
     app = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "imgs/start.png")))
-    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignHCenter |
-                       Qt.AlignBottom, Qt.black)
+        os.path.dirname(os.path.abspath(__file__)), "main/imgs/start.png")))
+    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignmentFlag.AlignHCenter |
+                       Qt.AlignmentFlag.AlignBottom, Qt.GlobalColor.black)
     splash.show()
     win = MainWindow()
     channel = QWebChannel()
@@ -260,4 +275,4 @@ if __name__ == '__main__':
     win.browser.page().setWebChannel(channel)
     win.show()
     splash.finish(win)
-    app.exit(app.exec_())
+    app.exit(app.exec())
