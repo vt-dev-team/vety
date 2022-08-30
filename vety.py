@@ -1,4 +1,3 @@
-from pickle import GLOBAL
 import sys
 import os
 import json
@@ -15,16 +14,15 @@ vetyApp = {
     "author": 'yemaster',
     "updates": [
         {
-            "version": 'v1.2.2',
+            "version": 'v1.2.2 TlM',
             "details": [
-                '添加了导出功能'
+                '可以选择附加音频'
             ]
         },
         {
-            "version": 'v1.2.0',
+            "version": 'v1.2.2',
             "details": [
-                '采用新的切分算法，更加准确',
-                '修改了部分界面',
+                '添加了导出功能'
             ]
         }
     ]
@@ -216,19 +214,6 @@ class MainWindow(QMainWindow):
         self.resize(450, 600)
         self.setWindowIcon(QIcon(os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "main/imgs/logo.ico")))
-        #self.effectShadow = QGraphicsDropShadowEffect(self)
-        #self.effectShadow.setOffset(0, 0)
-        #self.effectShadow.setBlurRadius(10)
-        #self.effectShadow.setColor(Qt.GlobalColor.gray)
-        #self.setGraphicsEffect(self.effectShadow)
-        #self.setWindowFlag(Qt.FramelessWindowHint)
-        """self.tempDir = TemporaryDirectory()
-        with AsarArchive.open('vety.asar') as archive:
-            with self.tempDir as f:
-                archive.extract(f)
-                self.browser = VetyMain()
-                self.browser.load(QUrl.fromLocalFile(os.path.join(
-                    f, "/index.html")))"""
 
         self.browser = VetyMain()
         self.browser.load(QUrl.fromLocalFile(os.path.join(
@@ -259,14 +244,12 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
+    #os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
     os.environ['path'] = os.path.join(os.path.dirname(
         __file__), "ffmpeg/bin/") + ";" + os.environ['path']
     app = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "main/imgs/start.png")))
-    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignmentFlag.AlignHCenter |
-                       Qt.AlignmentFlag.AlignBottom, Qt.GlobalColor.black)
     splash.show()
     win = MainWindow()
     channel = QWebChannel()

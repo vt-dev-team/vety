@@ -44,7 +44,7 @@ body,
     bottom: 0;
     left: 50px;
     right: 0;
-    padding: 10px 8px;
+    padding: 14px 8px;
     backdrop-filter: blur(3px);
     border-top: 1px solid #ddd;
 }
@@ -63,14 +63,13 @@ body,
 
 .vmenu {
     transition: all .2s;
-    background-color: transparent !important;
-    background-image: linear-gradient(160deg, #f0f4f8, #f0f3ed) !important;
+    background-color: #f7f7f7 !important;
     border-color: #ddd !important;
-    box-shadow: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25) !important;
 }
 
 .vmenu .active.item {
-    background-color: #dfdfdf !important;
+    background-color: #e4e5e5 !important;
 }
 
 .vmenu .item {
@@ -228,4 +227,48 @@ h4 {
 
 .vRightMenu ul li a:hover {
     background-color: rgba(240, 240, 240, .95);
+}
+
+td.abandoned {
+    color: #a0a0a0 !important;
+}
+
+.button.white {
+    font-weight: normal !important;
+    background-color: #fff;
+}
+
+.button.white:hover,
+.button.white:focus {
+    background-color: #f2f2f2;
+}
+
+.td.selectable {
+    font-weight: 200 !important;
+    color: #434445 !important;
+}
+
+.button.squared {
+    border-radius: 0 !important;
+}
+
+.button.homebtn {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25) !important;
+}
+
+.ui.styled.accordion,
+.ui.styled.accordion .accordion {
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 25%);
+}
+
+.controler-disabled::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, .8);
+    z-index: 30;
 }

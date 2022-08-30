@@ -40,11 +40,15 @@ let Vety = new Vue({
             materials: [],
             raw: []
         },
+        player: {
+            disabled: false
+        },
         nowTime: 0,
         allTime: 0,
         status: 0,
         playerPercent: 0,
-        chooseEle: 0
+        chooseEle: 0,
+        customPage: "",
     },
     computed: {
         reverseRecentFiles() {
@@ -233,7 +237,48 @@ let Vety = new Vue({
         },
         exportMp3(q) {
             this.chatWithPyQt(`export ${this.cutResult.materials[q][0]} ${this.cutResult.materials[q][1]}`)
-        }
+        },
+        /*extendMusic(z) {
+            let _t = this
+            _t.player.disabled = true
+            _t.changeExtendMusic(`h${_t.customPage}t`)
+        },
+        changeExtendMusic(p) {
+            let _t = this
+            if (p.length <= 0) {
+                _t.player.disabled = false
+                $(() => {
+                    $("#mainMusic").attr("src", _t.filename)
+                    let vety_audio = $("#mainMusic").get('0')
+                    $("#mainMusic").get('0').pause()
+                    _t.status = 0
+                    _t.nowTime = 0
+                    vety_audio.load()
+                    _t.play()
+                })
+                _t.play()
+                return
+            }
+            let musicName = "../extend/"
+            if (p[0] == "h")
+                musicName += "head.mp3"
+            else if (p[0] == "t")
+                musicName += "tail.mp3"
+            else
+                musicName += p[0] + ".mp3"
+            $(() => {
+                $("#mainMusic").attr("src", musicName)
+                let vety_audio = $("#mainMusic").get('0')
+                $("#mainMusic").get('0').pause()
+                _t.status = 0
+                _t.nowTime = 0
+                vety_audio.load()
+                _t.play()
+                vety_audio.onended = () => {
+                    _t.changeExtendMusic(p.slice(1))
+                }
+            })
+        }*/
     },
     components: {
         vetyProgress
