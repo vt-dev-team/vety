@@ -26,34 +26,38 @@
         </div>
         <div class="ui left fixed vertical icon borderless menu vmenu" :class="config.primaryColor">
             <div class="menuScroller"></div>
-            <a class="active item" data-tab='MainContent'>
-                <i class="home alternate icon"></i>
-            </a>
-            <a class="item" data-tab='ResContent'>
-                <i class="headphones alternate icon"></i>
-            </a>
-            <a class="item" data-tab='Settings'>
-                <i class="cog icon"></i>
-            </a>
-            <a class="item" data-tab='About'>
-                <i class="info alternate icon"></i>
+            <a class="item" v-for="(tabMenuItem,k) in menu.tabMenuItems" v-bind:key="k" @click="changeTab(k)" :class="{ active: menu.chosenTab == tabMenuItem.page}">
+                <i :class="tabMenuItem.icon+' icon'"></i>
             </a>
         </div>
-        <div class="ui app" style="height: calc(100% - 100px);overflow-y: auto;">
-            <div class='ui active tab' data-tab='MainContent'>
+        <div class="ui app" style="height: calc(100% - 100px);overflow-y: scroll;">
+            <div class='ui tab' ref="MainContent">
                 <h1 class="page-title">Vety!</h1>
                 <h3 class="ui header">文件操作</h3>
-                <div class="ui fluid vertical menu" :class="config.primaryColor">
-                    <a class="item" @click="chatWithPyQt('open')">打开文件</a>
+                <div class="ui grid">
+                    <div class="column">
+                        <div class="ui homebtn white button" tabindex="0" @click="chatWithPyQt('open')">
+                            音频解析
+                        </div>
+                        <!--div class="ui homebtn primary button" tabindex="0" @click="chatWithPyQt('open')">
+                            自定义解析
+                        </div-->
+                    </div>
                 </div>
                 <h3 class="ui header">最近文件</h3>
-                <div class="ui fluid vertical menu" :class="config.primaryColor">
-                    <a class="item" v-for="rcf in reverseRecentFiles" @click="chatWithPyQt('open '+rcf)">
+                <table class="ui fluid very basic unstackable table">
+                    <tbody>
+                        <tr v-for="rcf in reverseRecentFiles">
+                            <td class="selectable">
+                                <a class="item" @click="chatWithPyQt('open '+rcf)">
                             {{ rcf }}</a>
-                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class='ui tab' data-tab='ResContent'>
-                <h1 class="page-title">解析列表</h1>
+            <div class='ui tab' ref='ResContent'>
+                <h1 class="page-title">解析结果</h1>
                 <div v-if="filename.length > 0">
                     <table class="ui very basic celled table">
                         <tbody>
@@ -76,24 +80,40 @@
                                         <input type="checkbox" v-model="useExperienceCutName">
                                         <label>使用经验给文段命名</label>
                                     </div>
+                                    <!--div class="ui divider"></div>
+                                    <span>播放自定义片段(输入页码)</span><br>
+                                    <div class="ui fluid action input">
+                                        <input type="number" v-model="customPage">
+                                        <button class="ui button" @click="extendMusic('233')">好了</button>
+                                    </div-->
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <div class="ui fluid vertical menu" :class="config.primaryColor" v-if="useExperienceCutName">
-                        <a class="item" v-for="(m,d) in cutResult.materials" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000), choosed: d == chooseEle}">
+                    <table class="ui fluid very basic unstackable table" style="position: relative" :class="{ 'controler-disabled':player.disabled }">
+                        <tbody v-if="useExperienceCutName">
+                            <tr v-for="(m,d) in cutResult.materials">
+                                <td class="selectable" :class="{'abandoned':(player.nowTime >= m[1] / 1000),'blue':(player.nowTime >= m[0] / 1000) && (player.nowTime < m[1] / 1000), 'grey2332': d == chooseEle}">
+                                    <a class="item" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)">
                                 {{ m[2] }}</a>
-                    </div>
-                    <div class="ui fluid vertical menu" :class="config.primaryColor" v-else>
-                        <a class="item" v-for="(m,d) in cutResult.raw" @click="playFrom(m[0] / 1000)" :class="{grey:(nowTime >= m[1] / 1000),active:(nowTime >= m[0] / 1000) && (nowTime < m[1] / 1000)}">
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr v-for="(m,d) in cutResult.raw">
+                                <td class="selectable" :class="{'abandoned':(player.nowTime >= m[1] / 1000),'blue':(player.nowTime >= m[0] / 1000) && (player.nowTime < m[1] / 1000), 'grey233': d == chooseEle}">
+                                    <a class="item" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)">
                                 {{ m[2] }}</a>
-                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div v-else>
                     暂无解析
                 </div>
             </div>
-            <div class='ui tab' data-tab='About'>
+            <div class='ui tab' ref='About'>
                 <h1 class="page-title">Vety!</h1>
                 当前版本：v{{ app.version }}
                 <br> Made By {{ app.author }} With
@@ -102,8 +122,6 @@
                 <h3>目录</h3>
                 <ol>
                     <li><a href="#updateLog">更新日志</a></li>
-                    <li><a href="#tutorial">使用说明</a></li>
-                    <li><a href="#mztk">使用须知</a></li>
                 </ol>
                 <h2 id="updateLog">更新日志</h2>
                 <div class="ui divided items">
@@ -116,22 +134,10 @@
                         </div>
                     </div>
                 </div>
-                <hr/>
-                <h2 id="tutorial">使用说明</h2>
-                <p>Vety是一款英语听力播放软件，支持mp3文件及其他音频文件的播放。打开文件后，能自动根据音频的空白来进行分割，并根据经验自动标记。</p>
-                <p>本说明按照 1.0.6 版本进行编写</p>
-                <h3>打开文件</h3>
-                <p>用户可以按住Ctrl+O，或者点击主页(耳机按钮)-文件列表-打开文件，或者直接将文件拖入来打开文件。选择文件之后软件将自动跳转到解析列表，并且对音频进行切割，一般需要10s。</p>
-                <h3>播放器</h3>
-                <p>选择好文件之后，软件底部的播放器即可就绪。最下方三个按钮作用分别为回退5s，暂停/播放，前进5s。</p>
-                <p>选择好文件并且播放过音频之后，播放器的滑动条就绪，可以拖动或者点击选择进度。</p>
-                <p>切割好音频之后，解析结果将显示在主页(耳机按钮)-解析列表，用户可以根据需要点击材料进行播放。材料将根据播放进度用不同颜色显示，灰色表示已播放，蓝色表示进行中，黑色表示未播放。</p>
-                <hr/>
-                <h2 id="mztk">免责条款</h2>
                 <p>Vety的源代码可以在
                     <a href="https://github.com/vt-dev-team/vety" target="_blank">https://github.com/vt-dev-team/vety</a>上获取，采用GPL v2开源</p>
             </div>
-            <div class='ui tab' data-tab='Settings'>
+            <div class='ui tab' ref='Settings'>
                 <h1 class="page-title">设置</h1>
                 <div class="ui form">
                     <h3 class="ui horizontal left aligned divider header">
@@ -164,7 +170,7 @@
                     </div>
                 </div>
             </div>
-            <div class='ui tab' data-tab='Dyemaster'>
+            <div class='ui tab' ref='Dyemaster'>
                 <h1 class="page-title">Ohhhhhhhh</h1>
                 <p>你发现了彩蛋，但是彩蛋还没有写好~</p>
             </div>
@@ -173,15 +179,15 @@
             <div class="player" style="height: 100px">
                 <div style="display: flex;align-items: center; margin-bottom: 10px">
                     <span style="margin-right: 5px;">
-                        {{ formatSeconds(nowTime) }}
+                        {{ formatSeconds(player.nowTime) }}
                     </span>
                     <vety-progress :width='$(".c-progress").width()-30' ref="playerSlider" @perc="changePercent" style="width: 100%"></vety-progress>
 
                     <span style="margin-left: 5px;">
-                        {{ formatSeconds(allTime) }}
+                        {{ formatSeconds(player.allTime) }}
                     </span>
                 </div>
-                <div style="text-align:center; width: 100%">
+                <div style="text-align:center; width: 100%; " :class="{ 'controler-disabled':player.disabled }">
                     <button class=" ui circular basic icon button " @click="playAbsolute(-5) ">
                             <i class="undo icon "></i>
                         </button>
@@ -194,6 +200,7 @@
                     <button class="ui circular basic icon button " @click="playAbsolute(5) ">
                             <i class="redo icon "></i>
                         </button>
+                    <span class="playRate">×{{playRates[nowRate]}}</span>
                 </div>
             </div>
         </div>

@@ -1,12 +1,11 @@
-from logging.config import listen
 from pydub import AudioSegment
 import os
 import time
 os.environ['path'] = os.path.join(os.path.dirname(
-    __file__), "ffmpeg/bin/") + ";" + os.environ['path']
+    __file__), "../ffmpeg/bin/") + ";" + os.environ['path']
 
 
-def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min: int = 8500) -> dict:
+def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min: int = 7200, short_max: int = 8800) -> dict:
     """将英语听力文件切分。
 
     将一个英语听力文件根据空白音频段自动切分为多个材料，并且自动根据听力材料类型适配。
@@ -80,7 +79,7 @@ def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min
                 "length": i[2] - i[1] + 1
             })
 
-    # print(blanks)
+    #print(blanks)
 
     ret = {
         "special_modes": [],
@@ -94,10 +93,10 @@ def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min
     finish_short = False
     last_short = -1
     short_range = [0, 0]
-
+    
     for i in range(len(blanks)):
         if not finish_short:
-            if blanks[i]["length"] < long_min:
+            if blanks[i]["length"] < short_max:
                 if len(cutted_blanks_temp) > 0:
                     if i - last_short > 1 and len(cutted_blanks_temp) > 4:
                         finish_short = True
@@ -117,7 +116,7 @@ def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min
                 if blanks[j]["length"] < long_min or find_girl_friend[j]:
                     continue
                 girl_friend_cnt += 1
-                if abs(blanks[i]["length"] - blanks[j]["length"]) < 1100:
+                if abs(blanks[i]["length"] - blanks[j]["length"]) < 1300:
                     find_girl_friend[j] = True
                     cutted_blanks_temp.append(i)
                     cutted_blanks_temp.append(j)
@@ -226,7 +225,7 @@ def cut_listen_file_simple(file: str, max_zero: int = 10, min_num: int = 4200) -
 
 if __name__ == "__main__":
     TIMER_START = time.time()
-    print(cut_listen_file_simple("./tests/test2.mp3"))
+    print(cut_listen_file_simple("./tests/test4.mp3"))
 
     TIMER_END = time.time()
     print("Time Cost:", TIMER_END - TIMER_START, "s")

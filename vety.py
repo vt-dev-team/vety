@@ -1,4 +1,3 @@
-from pickle import GLOBAL
 import sys
 import os
 import json
@@ -11,20 +10,14 @@ from libs.vetyCutter import cut_listen_file_simple
 
 vetyApp = {
     "name": 'Vety',
-    "version": '1.2.2',
+    "version": '1.3.0',
     "author": 'yemaster',
     "updates": [
         {
-            "version": 'v1.2.2',
+            "version": 'v1.3.0',
             "details": [
-                '添加了导出功能'
-            ]
-        },
-        {
-            "version": 'v1.2.0',
-            "details": [
-                '采用新的切分算法，更加准确',
-                '修改了部分界面',
+                '优化了部分动画',
+                '优化了界面显示'
             ]
         }
     ]
@@ -83,7 +76,7 @@ class VetyThread(QThread):
         super(VetyThread, self).__init__()
 
     def run(self):
-        print(self.fname)
+        #print(self.fname)
         if self.fname and os.path.exists(self.fname):
             try:
                 global lis
@@ -144,14 +137,19 @@ class VetyMain(QWebEngineView):
                 self, '打开文件', './', 'mp3文件(*.mp3);;全部文件(*)')
         else:
             fname = q
-        if fname and os.path.exists(fname):
-            self.addRecentFiles(fname)
-            self.page().runJavaScript("Vety.openFile('{}');".format(fname))
-            self.page().runJavaScript(
-                "$(\"a[data-tab='ResContent']\").click()")
-            self.work.fname = fname
-            self.work.config = self.config
-            self.work.start()
+        if fname:
+            if os.path.exists(fname):
+                self.addRecentFiles(fname)
+                self.page().runJavaScript("Vety.openFile('{}');".format(fname))
+                self.page().runJavaScript(
+                    "Vety.changeTab(1)")
+                self.work.fname = fname
+                self.work.config = self.config
+                self.work.start()
+            else:
+                self.page().runJavaScript(
+                "$('body').toast({ class: 'error', message: '找不到文件' }); ")
+
 
     def getRecentFiles(self):
         recentFiles = self.settings.value('FileList/recentFiles') or []
@@ -216,19 +214,6 @@ class MainWindow(QMainWindow):
         self.resize(450, 600)
         self.setWindowIcon(QIcon(os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "main/imgs/logo.ico")))
-        #self.effectShadow = QGraphicsDropShadowEffect(self)
-        #self.effectShadow.setOffset(0, 0)
-        #self.effectShadow.setBlurRadius(10)
-        #self.effectShadow.setColor(Qt.GlobalColor.gray)
-        #self.setGraphicsEffect(self.effectShadow)
-        #self.setWindowFlag(Qt.FramelessWindowHint)
-        """self.tempDir = TemporaryDirectory()
-        with AsarArchive.open('vety.asar') as archive:
-            with self.tempDir as f:
-                archive.extract(f)
-                self.browser = VetyMain()
-                self.browser.load(QUrl.fromLocalFile(os.path.join(
-                    f, "/index.html")))"""
 
         self.browser = VetyMain()
         self.browser.load(QUrl.fromLocalFile(os.path.join(
@@ -259,14 +244,12 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
+    #os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
     os.environ['path'] = os.path.join(os.path.dirname(
         __file__), "ffmpeg/bin/") + ";" + os.environ['path']
     app = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "main/imgs/start.png")))
-    splash.showMessage("{} v{}".format(vetyApp["name"], vetyApp["version"]), Qt.AlignmentFlag.AlignHCenter |
-                       Qt.AlignmentFlag.AlignBottom, Qt.GlobalColor.black)
     splash.show()
     win = MainWindow()
     channel = QWebChannel()

@@ -1,6 +1,8 @@
 releases
+.git
 .vscode
 __pycache__
 ffmpeg
 tests
 releases
+extend
