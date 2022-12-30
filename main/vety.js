@@ -113,13 +113,10 @@ let Vety = new Vue({
                 _t.player.nowTime = audioElement.currentTime
                 _t.playerPercent = _t.nowPercent()
                 if (_t.player.allTime != audioElement.duration) {
-                    _t.player.allTime = audioElement.duration
-                    if (_t.player.allTime != audioElement.duration) {
                         _t.player.allTime = audioElement.duration
                     } else {
                         _t.$refs.playerSlider.changePercent(_t.playerPercent)
                     }
-                }
             })
             //document.documentElement.oncontextmenu = function(e) {
             //}
