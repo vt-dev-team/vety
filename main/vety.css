@@ -52,7 +52,6 @@ body,
     left: 50px;
     right: 0;
     padding: 14px 8px;
-    padding: 14px 8px;
     backdrop-filter: blur(3px);
     border-top: 1px solid #ddd;
 }
@@ -89,8 +88,6 @@ body,
 .vmenu .disabled.item {
     color: #888888 !important;
 }
-
-.app {}
 
 .nofileinfo {
     height: 100%;
