@@ -1,0 +1,383 @@
+@font-face {
+    font-family: "ssjhxt";
+    src: url('./statics/fonts/ssjhxt.ttf');
+}
+
+html,
+body,
+#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    user-select: none;
+}
+
+#app {
+    background-image: linear-gradient(160deg, #f0f0f0, #fffdfb) !important;
+}
+
+.ui.tab {
+    height: 100%;
+    overflow-y: auto;
+    margin-top: 40px;
+    margin-left: 62px;
+    padding: 14px 28px;
+}
+
+.topBar {
+    position: fixed;
+    left: 60px;
+    right: 0;
+    top: 0;
+    z-index: 1002 !important;
+    font-size: 14px;
+}
+
+.topBar span {
+    -webkit-app-region: drag;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 133.53px;
+    height: 30px;
+    padding: 8px 16px;
+}
+
+.topBar .icon {
+    line-height: 1em;
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+.topButtons {
+    z-index: 1234 !important;
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+
+.topButton {
+    float: right;
+    padding: 6px 14px;
+    transition: background .1s ease-in, color .1s ease-in;
+}
+
+.topButton .icon {
+    margin: 0 !important;
+}
+
+.topButton.red:hover {
+    background-color: #de061a;
+    color: #fff;
+}
+
+.topButton:hover {
+    background-color: #dedede;
+}
+
+.topButton,
+.topButton:hover {
+    color: #000;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 5px #bebebe;
+    background: #bebebe;
+    transition: all 0.5s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    -webkit-box-shadow: inset 0 0 5px #aaaaaa;
+    background: #aaaaaa;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 5px #e0e0e0;
+    background: #e0e0e0;
+    opacity: 1;
+}
+
+.player {
+    background-color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 18px 20px;
+    border-top: 1px solid #ddd;
+    z-index: 1000;
+}
+
+.player .ui.slider {
+    padding: 0 !important;
+}
+
+.player .column {
+    padding: 0 !important;
+}
+
+.player .right.column {
+    padding-left: 10px !important;
+}
+
+.vmenu {
+    transition: all .2s;
+    background-image: linear-gradient(160deg, #fafafa, #fdfdfb) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .2)!important;
+}
+
+.vmenu .item {
+    margin: 0;
+    padding-top: 20px !important;
+    width: 60px;
+    height: 55px !important;
+    overflow: hidden;
+    transition: padding 0.3s ease !important;
+}
+
+
+/*.vmenu .item:first-of-type {
+    margin-top: 28px;
+}*/
+
+.vmenu .item .icon {
+    color: #000 !important;
+    font-size: 20px;
+    width: 100% !important;
+    transition: all 0.3s ease;
+}
+
+.vmenu .item .text {
+    opacity: 0;
+    color: #444 !important;
+    margin-top: -1em;
+    display: block;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.vmenu .item.active {
+    background-color: transparent !important;
+}
+
+.vmenu .item:hover {
+    background-color: transparent !important;
+    padding-top: 16px !important;
+}
+
+
+/*.vmenu .item.active .icon,*/
+
+.vmenu .item:hover .icon {
+    font-size: 17px;
+}
+
+.vmenu .item:hover .text {
+    opacity: 1;
+    margin-top: 0.7em;
+}
+
+.nofileinfo {
+    height: 100%;
+    margin-top: 0 !important;
+    background: #fff !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.ui.tab {
+    height: 100%;
+}
+
+.page-title,
+.vetyHeader {
+    font-family: "ssjhxt" !important;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.vetyCard {
+    transition: all .15s ease;
+    padding: 16px;
+    margin-bottom: 15px;
+    background-image: linear-gradient(160deg, #fafafa, #fdfdfb) !important;
+    box-shadow: 0 5px 15px rgba(50, 50, 93, .1), 0 5px 8px rgba(0, 0, 0, .07)!important;
+}
+
+.ui.styled.accordion .accordion .title,
+.ui.styled.accordion .title {
+    font-weight: normal;
+    color: #212223;
+}
+
+.vertical.menu .menuScroller {
+    left: 7px;
+    width: 3px;
+}
+
+.menu:not(.vertical) .menuScroller {
+    left: 34px;
+    width: 20px;
+    bottom: 0px;
+    height: 3px;
+}
+
+.menu .menuScroller {
+    position: absolute;
+    border-radius: 10px;
+    background-color: #2185d0;
+    box-shadow: 0 4px 8px #2185d020;
+    transition: all .8s cubic-bezier(0.95, 0.1, 0.05, 0.9);
+    z-index: 200;
+}
+
+.filemenu {
+    position: relative;
+    border: none !important;
+    box-shadow: none !important;
+    margin-bottom: 30px !important;
+}
+
+.filemenu .item {
+    background-color: transparent !important;
+}
+
+.menu .item.grey {
+    color: #888888 !important;
+}
+
+.c-progress {
+    display: flex;
+    align-items: center;
+}
+
+.c-progress span {
+    margin-left: 5px;
+    font-size: 14px;
+    color: #666;
+}
+
+.c-progress .c-progress-outer {
+    height: 5px;
+    border-radius: 5px;
+    background: #ebeef5;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.c-progress .c-progress-outer .c-progress-inner {
+    width: 100px;
+    height: 5px;
+    background: #2185d0;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px #2185d040;
+}
+
+.c-progress .c-progress-outer .c-progress-slider {
+    width: 20px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #2185d0;
+    position: absolute;
+    z-index: 10;
+    left: 10px;
+}
+
+.ui.settings.button {
+    background-color: transparent;
+}
+
+.ui.settings.button:hover {
+    background-color: #fafafa;
+}
+
+.vRightMenu {
+    position: absolute;
+    width: 200px;
+    background-color: rgba(254, 254, 254, .85);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
+    display: none;
+    z-index: 1000;
+}
+
+.vRightMenu ul {
+    list-style-type: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.vRightMenu ul li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.vRightMenu ul li a:hover {
+    background-color: rgba(240, 240, 240, .95);
+}
+
+td.abandoned {
+    color: #a0a0a0 !important;
+}
+
+.button.white {
+    font-weight: normal !important;
+    background-color: #fff;
+}
+
+.button.white:hover,
+.button.white:focus {
+    background-color: #f2f2f2;
+}
+
+.td.selectable {
+    font-weight: 200 !important;
+    color: #434445 !important;
+}
+
+.button.squared {
+    border-radius: 0 !important;
+}
+
+.button.homebtn {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25) !important;
+}
+
+.ui.styled.accordion,
+.ui.styled.accordion .accordion {
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 25%);
+}
+
+.controler-disabled::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, .8);
+    z-index: 30;
+}
+
+.playRate {
+    position: absolute;
+    line-height: 36.67px;
+    right: 10px;
+    color: #aaa;
+}
