@@ -9,11 +9,37 @@ let Vety = new Vue({
             author: 'Project Author',
             updates: []
         },
+        preference: {
+            themes: {
+                "Classic": {
+                    "primary": "blue"
+                },
+                "Dark": {
+                    "primary": "blue"
+                }
+            },
+            choosed: "Classic"
+        },
         usefulWords: [
             "小提示：Ctrl+Shift+F/L可以倍速播放",
             "小提示：空格可以暂停/播放",
             "小提示：Ctrl+O可以快速打开文件",
-            "Nothing brave, nothing have.", "No one can call back yesterday.", "No rose without a thorn.", "Not to advance is to go back.", "Nothing in the world is difficult for one who sets his mind to it.", "No way is impossible to courage.", "No man can do two things at once.", "No man is born wise or learned.", "No man is content.", "No man is wise at all times.", "None are so blind as those who won’t see.", "None are so deaf as those who won’t hear.", "No news is good news.", "No cross, no crown.", "No pains, no gains.", "No pleasure without pain.", "New wine in old bottles.", "No sweet without sweat.", "No smoke without fire.", "Never too old to learn, never too late to turn.", "Nothing dries sooner than a tear.", "No garden without its weeds.", "Nothing is difficult to the man who will try.", "Nothing seek, nothing find.", "Nothing is so necessary for travelers as languages.", "Nothing is to be got without pains but poverty.", "Never say die.", "Not to know what happened before one was born is always to be a child.", "No living man all things can.", "Obedience is the first duty of a soldier.", "Observation is the best teacher.", "Offense is the best defense.", "Old friends and old wines are best.", "Old sin makes new shame.", "Once a man and twice a child.", "Once a thief, always a thief.", "Once bitten, twice shy.", "One boy is a boy, two boys half a boy, three boys no boy.", "One cannot put back the clock.", "One eyewitness is better than ten hearsays.", "One false move may lose the game.", "One good turn deserves another.", "One hour today is worth two tomorrow.", "One man’s fault is other man’s lesson.", "One never loses anything by politeness.", "One swallow does not make a summer.", "One’s words reflect one’s thinking.", "Out of debt, out of danger.", "Out of office, out of danger.", "Out of sight, out of mind.", "Patience is the best remedy.", "Penny wise, pound foolish.", "Plain dealing is praised more than practiced.", "Please the eye and plague the heart.", "Pleasure comes through toil.", "Pour water into a sieve.", "Practice makes perfect.", "Praise is not pudding.", "Praise makes good men better, and bad men worse.", "Prefer loss to unjust gain.", "Prevention is better than cure.", "Pride goes before, and shame comes after.", "Promise is debt.", "Proverbs are the daughters of daily experience.", "Pull the chestnut out of fire.", "Put the cart before the horse.", "Put your shoulder to the wheel.", "Reading enriches the mind.", "Reading is to the mind while exercise to the body.", "Respect yourself, or no one else will respect you.", "Rome is not built in a day.", "Saying is one thing and doing another.", "Seeing is believing.", "Seek the truth from facts.", "Send a wise man on an errand, and say nothing to him.", "Set a thief to catch a thief.", "He is not fit to command others that cannot command himself.", "Something is better than nothing.", "He is wise that is honest.", "Soon ripe, soon rotten.", "Speech is silver, silence is gold.", "Still water run deep.", "Strike the iron while it is hot.", "Success belongs to the persevering.", "Take things as they come.", "Talking mends no holes.", "Talk of the devil and he will appear.", "Hasty love, soon cold.", "Health is better than wealth.", "Health is happiness.", "Hear all parties.", "He knows most who speaks least", "He is a fool that forgets himself.", "He is a good friend that speaks well of us behind our backs.", "He is a wise man who speaks little.", "He is lifeless that is faultless.", "Short accounts make long friends.", "He is not laughed at that laughs at himself first.", "Soon learn, soon forgotten.", "Heaven never helps the man who will not act."
+            "She was lovely.Then things changed.",
+            "One candle, unattended.Only ashesremain.",
+            "I leave.Dog panics.Furniture sale.",
+            "Imagined adulthood.Gained adulthood.Lost Imagination.",
+            "Cancer.Only three months left.Pregnant.",
+            "Nothing to declare.Much to remember.",
+            "New start.Newyou.Not you.",
+            "Relationshipexpires;leaves a bitter aftertaste.",
+            "She's his love;he's her wallet.",
+            "They livedhappily ever after.Separately.",
+            "First Friends.Then Lover.Lost both.",
+            "Two wives, one funeral.No tear",
+            "Tow lovers.One parachute.No survivors.",
+            "'I love you too,'she lied.",
+            "He loves her, they're just friends.",
+            "Fantasticweekend.Then he never called."
         ],
         unibody: "window",
         menu: {
@@ -121,6 +147,9 @@ let Vety = new Vue({
     methods: {
         chatWithPyQt: function(c) {
             window.vetyBridge.value = c
+        },
+        getTheme(g) {
+            return this.preference.themes[this.preference.choosed][g]
         },
         changeTab: function(d) {
             let _t = this

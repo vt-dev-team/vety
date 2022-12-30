@@ -1,3 +1,11 @@
+# !/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @Time : 2022-12-30 13-46
+# @Author : yemaster
+# @Email : yemaster@oigat.cn
+# @File : vety.py
+# @Software: Vety Interface 1.3.1
+
 import sys
 import os
 import json
@@ -10,9 +18,17 @@ from libs.vetyCutter import cut_listen_file_simple
 
 vetyApp = {
     "name": 'Vety',
-    "version": '1.3.0',
+    "version": '1.3.1',
+    "coreVersion": '1.3.1',
     "author": 'yemaster',
     "updates": [
+        {
+            "version": 'v1.3.1',
+            "details": [
+                '优化了界面显示',
+                '修复了部分Bug'
+            ]
+        },
         {
             "version": 'v1.3.0',
             "details": [
@@ -24,6 +40,7 @@ vetyApp = {
 }
 
 lis = None
+
 
 class VetyShared(QWidget):
     def __init__(self):
@@ -60,12 +77,14 @@ class VetyShared(QWidget):
                     f"Vety.config = {json.dumps(q)}")
         elif p[0] == "export":
             if not lis is None:
-                fn = QFileDialog.getSaveFileName(win, "保存mp3文件", './', 'mp3文件(*.mp3);;全部文件(*)')[0]
+                fn = QFileDialog.getSaveFileName(
+                    win, "保存mp3文件", './', 'mp3文件(*.mp3);;全部文件(*)')[0]
                 try:
                     lis[int(allP[1]):int(allP[2])+1].export(fn, format="mp3")
                 except Exception as e:
                     print("Error", e)
     value = Property(str, fget=PyQt52WebValue, fset=Web2PyQt5Value)
+
 
 class VetyThread(QThread):
     trigger = Signal(str)
@@ -76,7 +95,7 @@ class VetyThread(QThread):
         super(VetyThread, self).__init__()
 
     def run(self):
-        #print(self.fname)
+        # print(self.fname)
         if self.fname and os.path.exists(self.fname):
             try:
                 global lis
@@ -148,8 +167,7 @@ class VetyMain(QWebEngineView):
                 self.work.start()
             else:
                 self.page().runJavaScript(
-                "$('body').toast({ class: 'error', message: '找不到文件' }); ")
-
+                    "$('body').toast({ class: 'error', message: '找不到文件' }); ")
 
     def getRecentFiles(self):
         recentFiles = self.settings.value('FileList/recentFiles') or []
@@ -182,7 +200,7 @@ class VetyMain(QWebEngineView):
     def getConfig(self, key=None):
         if key is None:
             maxZero = self.settings.value('Config/maxZero') or 5
-            zeroNums = self.settings.value('Config/zeroNums') or 4950
+            zeroNums = self.settings.value('Config/zeroNums') or 4150
             primaryColor = self.settings.value(
                 'Config/primaryColor') or 'primary'
             standardFile = self.settings.value(
@@ -197,7 +215,7 @@ class VetyMain(QWebEngineView):
             if key == "maxZero":
                 return self.settings.value('Config/maxZero') or 5
             elif key == "zeroNums":
-                return self.settings.value('Config/zeroNums') or 4950
+                return self.settings.value('Config/zeroNums') or 4150
             elif key == "primaryColor":
                 return self.settings.value('Config/primaryColor') or 'primary'
             elif key == "standardFile":

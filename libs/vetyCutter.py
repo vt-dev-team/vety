@@ -1,8 +1,16 @@
-from pydub import AudioSegment
+# !/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @Time : 2022-12-30 13-47
+# @Author : yemaster
+# @Email : yemaster@oigat.cn
+# @File : vetyCutter.py
+# @Software: Vety Core 1.3.1
 import os
-import time
 os.environ['path'] = os.path.join(os.path.dirname(
     __file__), "../ffmpeg/bin/") + ";" + os.environ['path']
+from pydub import AudioSegment
+
+import time
 
 
 def cut_listen_file(file: str, max_zero: int = 10, min_num: int = 4200, long_min: int = 7200, short_max: int = 8800) -> dict:

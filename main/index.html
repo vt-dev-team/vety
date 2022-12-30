@@ -15,8 +15,8 @@
 
 <body>
     <div id="app">
-        <div class="ui active inverted dimmer" v-show="isLoadingFile">
-            <div class="ui text elastic inline loader" :class="config.primaryColor">{{ loadText }}</div>
+        <div class="ui active inverted dimmer" v-show="isLoadingFile" style="backdrop-filter: blur(3px)">
+            <div class="ui text elastic inline loader" :class="getTheme('primary')">{{ loadText }}</div>
         </div>
         <div class="vRightMenu" id="rightMenu">
             <ul>
@@ -24,13 +24,13 @@
                 <li><a href="javascript:;" @click="exportMp3(chooseEle)">导出为mp3</a></li>
             </ul>
         </div>
-        <div class="ui left fixed vertical icon borderless menu vmenu" :class="config.primaryColor">
+        <div class="ui left fixed vertical icon borderless menu vmenu" :class="getTheme('primary')">
             <div class="menuScroller"></div>
             <a class="item" v-for="(tabMenuItem,k) in menu.tabMenuItems" v-bind:key="k" @click="changeTab(k)" :class="{ active: menu.chosenTab == tabMenuItem.page}">
                 <i :class="tabMenuItem.icon+' icon'"></i>
             </a>
         </div>
-        <div class="ui app" style="height: calc(100% - 100px);overflow-y: scroll;">
+        <div class="ui app" style="height: calc(100% - 100px);">
             <div class='ui tab' ref="MainContent">
                 <h1 class="page-title">Vety!</h1>
                 <h3 class="ui header">文件操作</h3>
@@ -115,7 +115,7 @@
             </div>
             <div class='ui tab' ref='About'>
                 <h1 class="page-title">Vety!</h1>
-                当前版本：v{{ app.version }}
+                外观版本：v{{ app.version }} 内核版本：v{{ app.coreVersion }}
                 <br> Made By {{ app.author }} With
                 <font color="#db2828">♥</font>
                 <hr/>
@@ -162,17 +162,13 @@
                     </h3>
                     <div class="ui styled accordion">
                         <div class="title">
-                            <i class="dropdown icon"></i> 主题色
+                            <i class="dropdown icon"></i> 皮肤
                         </div>
                         <div class="content">
                             <input type="text" v-model="config.primaryColor" @change="chatWithPyQt('update config primaryColor ' + config.primaryColor)">
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class='ui tab' ref='Dyemaster'>
-                <h1 class="page-title">Ohhhhhhhh</h1>
-                <p>你发现了彩蛋，但是彩蛋还没有写好~</p>
             </div>
             <audio id="mainMusic" src="" type="audio/mp3" style="display: none" controls>
             </audio>
@@ -188,13 +184,13 @@
                     </span>
                 </div>
                 <div style="text-align:center; width: 100%; " :class="{ 'controler-disabled':player.disabled }">
-                    <button class=" ui circular basic icon button " @click="playAbsolute(-5) ">
+                    <button class="ui circular basic icon button " @click="playAbsolute(-5) ">
                             <i class="undo icon "></i>
                         </button>
-                    <button class="ui circular basic icon button " :class="config.primaryColor " @click="play() " v-if="status==0 ">
+                    <button class="ui circular basic icon button " :class="getTheme('primary') " @click="play() " v-if="status==0 ">
                             <i class="play icon "></i>
                         </button>
-                    <button class="ui circular basic icon button " :class="config.primaryColor " @click="stop() " v-else-if="status==1 ">
+                    <button class="ui circular basic icon button " :class="getTheme('primary') " @click="stop() " v-else-if="status==1 ">
                             <i class="pause icon "></i>
                         </button>
                     <button class="ui circular basic icon button " @click="playAbsolute(5) ">
@@ -205,8 +201,8 @@
             </div>
         </div>
     </div>
-    <script src="./vety.progress.js "></script>
-    <script src="./vety.js "></script>
+    <script src="./vety.progress.js"></script>
+    <script src="./vety.js"></script>
 </body>
 
 </html>
