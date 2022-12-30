@@ -28,7 +28,9 @@
             <div class="menuScroller"></div>
             <a class="item" v-for="(tabMenuItem,k) in menu.tabMenuItems" v-bind:key="k" @click="changeTab(k)" :class="{ active: menu.chosenTab == tabMenuItem.page}">
                 <i :class="tabMenuItem.icon+' icon'"></i>
-            </a>
+                <a class="item" v-for="(tabMenuItem,k) in menu.tabMenuItems" v-bind:key="k" @click="changeTab(k)" :class="{ active: menu.chosenTab == tabMenuItem.page}">
+                    <i :class="tabMenuItem.icon+' icon'"></i>
+                </a>
         </div>
         <div class="ui app" style="height: calc(100% - 100px);">
             <div class='ui tab' ref="MainContent">
@@ -43,166 +45,180 @@
                             自定义解析
                         </div-->
                     </div>
-                </div>
-                <h3 class="ui header">最近文件</h3>
-                <table class="ui fluid very basic unstackable table">
-                    <tbody>
-                        <tr v-for="rcf in reverseRecentFiles">
-                            <td class="selectable">
-                                <a class="item" @click="chatWithPyQt('open '+rcf)">
-                            {{ rcf }}</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class='ui tab' ref='ResContent'>
-                <h1 class="page-title">解析结果</h1>
-                <div v-if="filename.length > 0">
-                    <table class="ui very basic celled table">
+                    <div class="ui grid">
+                        <div class="column">
+                            <div class="ui homebtn white button" tabindex="0" @click="chatWithPyQt('open')">
+                                音频解析
+                            </div>
+                            <!--div class="ui homebtn primary button" tabindex="0" @click="chatWithPyQt('open')">
+                            自定义解析
+                        </div-->
+                        </div>
+                    </div>
+                    <h3 class="ui header">最近文件</h3>
+                    <table class="ui fluid very basic unstackable table">
                         <tbody>
-                            <tr>
-                                <th width="2">文件名</th>
-                                <td width="8">
-                                    {{ filename }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>特殊性质</th>
-                                <td>
-                                    <div class="ui horizontal label" v-for="(s_m,k) in cutResult.special_modes" v-bind:key="k">{{ s_m }}</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>操作</th>
-                                <td>
-                                    <div class="ui slider checkbox">
-                                        <input type="checkbox" v-model="useExperienceCutName">
-                                        <label>使用经验给文段命名</label>
-                                    </div>
-                                    <!--div class="ui divider"></div>
+                            <tr v-for="rcf in reverseRecentFiles">
+                                <td class="selectable">
+                                    <a class="item" @click="chatWithPyQt('open '+rcf)">
+                                        <table class="ui fluid very basic unstackable table">
+                                            <tbody>
+                                                <tr v-for="rcf in reverseRecentFiles">
+                                                    <td class="selectable">
+                                                        <a class="item" @click="chatWithPyQt('open '+rcf)">
+                            {{ rcf }}</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                </div>
+                <div class='ui tab' ref='ResContent'>
+                    <h1 class="page-title">解析结果</h1>
+                    <div v-if="filename.length > 0">
+                        <table class="ui very basic celled table">
+                            <tbody>
+                                <tr>
+                                    <th width="2">文件名</th>
+                                    <td width="8">
+                                        {{ filename }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>特殊性质</th>
+                                    <td>
+                                        <div class="ui horizontal label" v-for="(s_m,k) in cutResult.special_modes" v-bind:key="k">{{ s_m }}</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>操作</th>
+                                    <td>
+                                        <div class="ui slider checkbox">
+                                            <input type="checkbox" v-model="useExperienceCutName">
+                                            <label>使用经验给文段命名</label>
+                                        </div>
+                                        <!--div class="ui divider"></div>
                                     <span>播放自定义片段(输入页码)</span><br>
                                     <div class="ui fluid action input">
                                         <input type="number" v-model="customPage">
                                         <button class="ui button" @click="extendMusic('233')">好了</button>
                                     </div-->
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table class="ui fluid very basic unstackable table" style="position: relative" :class="{ 'controler-disabled':player.disabled }">
-                        <tbody v-if="useExperienceCutName">
-                            <tr v-for="(m,d) in cutResult.materials">
-                                <td class="selectable" :class="{'abandoned':(player.nowTime >= m[1] / 1000),'blue':(player.nowTime >= m[0] / 1000) && (player.nowTime < m[1] / 1000), 'grey2332': d == chooseEle}">
-                                    <a class="item" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="ui fluid very basic unstackable table" style="position: relative" :class="{ 'controler-disabled':player.disabled }">
+                            <tbody v-if="useExperienceCutName">
+                                <tr v-for="(m,d) in cutResult.materials">
+                                    <td class="selectable" :class="{'abandoned':(player.nowTime >= m[1] / 1000),'blue':(player.nowTime >= m[0] / 1000) && (player.nowTime < m[1] / 1000), 'grey2332': d == chooseEle}">
+                                        <a class="item" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)">
                                 {{ m[2] }}</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tbody v-else>
-                            <tr v-for="(m,d) in cutResult.raw">
-                                <td class="selectable" :class="{'abandoned':(player.nowTime >= m[1] / 1000),'blue':(player.nowTime >= m[0] / 1000) && (player.nowTime < m[1] / 1000), 'grey233': d == chooseEle}">
-                                    <a class="item" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)">
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody v-else>
+                                <tr v-for="(m,d) in cutResult.raw">
+                                    <td class="selectable" :class="{'abandoned':(player.nowTime >= m[1] / 1000),'blue':(player.nowTime >= m[0] / 1000) && (player.nowTime < m[1] / 1000), 'grey233': d == chooseEle}">
+                                        <a class="item" @click="playFrom(m[0] / 1000)" @click.right="showContextMenu(d, $event)">
                                 {{ m[2] }}</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else>
+                        暂无解析
+                    </div>
                 </div>
-                <div v-else>
-                    暂无解析
+                <div class='ui tab' ref='About'>
+                    <h1 class="page-title">Vety!</h1>
+                    外观版本：v{{ app.version }} 内核版本：v{{ app.coreVersion }}
+                    <br> Made By {{ app.author }} With
+                    <font color="#db2828">♥</font>
+                    <hr/>
+                    <h3>目录</h3>
+                    <ol>
+                        <li><a href="#updateLog">更新日志</a></li>
+                    </ol>
+                    <h2 id="updateLog">更新日志</h2>
+                    <div class="ui divided items">
+                        <div class="item" v-for="(p, i) in app.updates">
+                            <div class="content">
+                                <h4 class="header">{{ p.version }}</h4>
+                                <div class="ui ordered list">
+                                    <a class="item" v-for="(q, t) in p.details">{{q}}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p>Vety的源代码可以在
+                        <a href="https://github.com/vt-dev-team/vety" target="_blank">https://github.com/vt-dev-team/vety</a>上获取，采用GPL v2开源</p>
                 </div>
-            </div>
-            <div class='ui tab' ref='About'>
-                <h1 class="page-title">Vety!</h1>
-                外观版本：v{{ app.version }} 内核版本：v{{ app.coreVersion }}
-                <br> Made By {{ app.author }} With
-                <font color="#db2828">♥</font>
-                <hr/>
-                <h3>目录</h3>
-                <ol>
-                    <li><a href="#updateLog">更新日志</a></li>
-                </ol>
-                <h2 id="updateLog">更新日志</h2>
-                <div class="ui divided items">
-                    <div class="item" v-for="(p, i) in app.updates">
-                        <div class="content">
-                            <h4 class="header">{{ p.version }}</h4>
-                            <div class="ui ordered list">
-                                <a class="item" v-for="(q, t) in p.details">{{q}}</a>
+                <div class='ui tab' ref='Settings'>
+                    <h1 class="page-title">设置</h1>
+                    <div class="ui form">
+                        <h3 class="ui horizontal left aligned divider header">
+                            <i class="cogs icon"></i>基础设置
+                        </h3>
+                        <div class="ui styled accordion">
+                            <div class="title">
+                                <i class="dropdown icon"></i> 空白响度最值(单位:响度)
+                            </div>
+                            <div class="content">
+                                <input type="number" v-model="config.maxZero" @change="chatWithPyQt('update config maxZero ' + config.maxZero)">
+                            </div>
+                            <div class="title">
+                                <i class="dropdown icon"></i> 分割间距(单位:毫秒)
+                            </div>
+                            <div class="content">
+                                <input type="number" v-model="config.zeroNums" @change="chatWithPyQt('update config zeroNums ' + config.zeroNums)">
+                            </div>
+                        </div>
+                        <h3 class="ui horizontal left aligned divider header">
+                            <i class="paint roller icon"></i>外观
+                        </h3>
+                        <div class="ui styled accordion">
+                            <div class="title">
+                                <i class="dropdown icon"></i> 皮肤
+                            </div>
+                            <div class="content">
+                                <input type="text" v-model="config.primaryColor" @change="chatWithPyQt('update config primaryColor ' + config.primaryColor)">
                             </div>
                         </div>
                     </div>
                 </div>
-                <p>Vety的源代码可以在
-                    <a href="https://github.com/vt-dev-team/vety" target="_blank">https://github.com/vt-dev-team/vety</a>上获取，采用GPL v2开源</p>
-            </div>
-            <div class='ui tab' ref='Settings'>
-                <h1 class="page-title">设置</h1>
-                <div class="ui form">
-                    <h3 class="ui horizontal left aligned divider header">
-                        <i class="cogs icon"></i>基础设置
-                    </h3>
-                    <div class="ui styled accordion">
-                        <div class="title">
-                            <i class="dropdown icon"></i> 空白响度最值(单位:响度)
-                        </div>
-                        <div class="content">
-                            <input type="number" v-model="config.maxZero" @change="chatWithPyQt('update config maxZero ' + config.maxZero)">
-                        </div>
-                        <div class="title">
-                            <i class="dropdown icon"></i> 分割间距(单位:毫秒)
-                        </div>
-                        <div class="content">
-                            <input type="number" v-model="config.zeroNums" @change="chatWithPyQt('update config zeroNums ' + config.zeroNums)">
-                        </div>
-                    </div>
-                    <h3 class="ui horizontal left aligned divider header">
-                        <i class="paint roller icon"></i>外观
-                    </h3>
-                    <div class="ui styled accordion">
-                        <div class="title">
-                            <i class="dropdown icon"></i> 皮肤
-                        </div>
-                        <div class="content">
-                            <input type="text" v-model="config.primaryColor" @change="chatWithPyQt('update config primaryColor ' + config.primaryColor)">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <audio id="mainMusic" src="" type="audio/mp3" style="display: none" controls>
+                <audio id="mainMusic" src="" type="audio/mp3" style="display: none" controls>
             </audio>
-            <div class="player" style="height: 100px">
-                <div style="display: flex;align-items: center; margin-bottom: 10px">
-                    <span style="margin-right: 5px;">
+                <div class="player" style="height: 100px">
+                    <div style="display: flex;align-items: center; margin-bottom: 10px">
+                        <span style="margin-right: 5px;">
                         {{ formatSeconds(player.nowTime) }}
                     </span>
-                    <vety-progress :width='$(".c-progress").width()-30' ref="playerSlider" @perc="changePercent" style="width: 100%"></vety-progress>
+                        <vety-progress :width='$(".c-progress").width()-30' ref="playerSlider" @perc="changePercent" style="width: 100%"></vety-progress>
 
-                    <span style="margin-left: 5px;">
+                        <span style="margin-left: 5px;">
                         {{ formatSeconds(player.allTime) }}
                     </span>
-                </div>
-                <div style="text-align:center; width: 100%; " :class="{ 'controler-disabled':player.disabled }">
-                    <button class="ui circular basic icon button " @click="playAbsolute(-5) ">
+                    </div>
+                    <div style="text-align:center; width: 100%; " :class="{ 'controler-disabled':player.disabled }">
+                        <button class="ui circular basic icon button " @click="playAbsolute(-5) ">
                             <i class="undo icon "></i>
                         </button>
-                    <button class="ui circular basic icon button " :class="getTheme('primary') " @click="play() " v-if="status==0 ">
+                        <button class="ui circular basic icon button " :class="getTheme('primary') " @click="play() " v-if="status==0 ">
                             <i class="play icon "></i>
                         </button>
-                    <button class="ui circular basic icon button " :class="getTheme('primary') " @click="stop() " v-else-if="status==1 ">
+                        <button class="ui circular basic icon button " :class="getTheme('primary') " @click="stop() " v-else-if="status==1 ">
                             <i class="pause icon "></i>
                         </button>
-                    <button class="ui circular basic icon button " @click="playAbsolute(5) ">
+                        <button class="ui circular basic icon button " @click="playAbsolute(5) ">
                             <i class="redo icon "></i>
                         </button>
-                    <span class="playRate">×{{playRates[nowRate]}}</span>
+                        <span class="playRate">×{{playRates[nowRate]}}</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script src="./vety.progress.js"></script>
-    <script src="./vety.js"></script>
+        <script src="./vety.progress.js"></script>
+        <script src="./vety.js"></script>
 </body>
 
 </html>
