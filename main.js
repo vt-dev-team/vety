@@ -1,8 +1,10 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain, dialog, ipcRenderer } = require('electron')
 const { exec } = require('child_process')
 const fs = require("fs")
 const path = require('path')
+const Store = require("electron-store")
+const store = new Store()
 require('@electron/remote/main').initialize()
 
 function createWindow() {
@@ -62,11 +64,32 @@ function createWindow() {
     mainWindow.on('unmaximize', () => {
         mainWindow.webContents.send('mainWin-max', false)
     })
+    let recent = []
+    if (store.get("recentFiles"))
+        recent = store.get("recentFiles")
+    ipcMain.on('vetyLoaded', () => {
+        mainWindow.webContents.send("getRecent", recent)
+    })
+    ipcMain.on('clearRecent', (_, d) => {
+        recent.splice(recent.length - d - 1, 1)
+        store.set("recentFiles", recent)
+        mainWindow.webContents.send("getRecent", recent)
+    })
 
     function parseFile(fn) {
         if (!fs.existsSync(fn)) {
             mainWindow.webContents.send('mes', 'error', '', `文件${fn}找不到`)
         }
+        let rcI = recent.indexOf(fn)
+        if (rcI != -1) {
+            recent.splice(rcI, 1)
+        }
+        if (recent.length >= 10)
+            recent.splice(0, 1)
+        recent.push(fn)
+            //console.log(recent)
+        store.set("recentFiles", recent)
+        mainWindow.webContents.send("getRecent", recent)
         fn = fn.replace(/\\/g, "\\\\")
         mainWindow.webContents.executeJavaScript("Vety.changeTab(1); Vety.clearToLoad();")
         mainWindow.webContents.executeJavaScript("Vety.openFile('" + fn + "')")

@@ -409,3 +409,24 @@ td.abandoned {
     right: 10px;
     color: #aaa;
 }
+
+.listItem {
+    position: relative !important;
+}
+
+.listCloseBtn:hover {
+    color: #000 !important;
+}
+
+.listCloseBtn {
+    position: absolute;
+    z-index: 60;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    color: #aaa;
+}
+
+.listItem:hover .listCloseBtn {
+    opacity: 1;
+}

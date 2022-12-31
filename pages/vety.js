@@ -109,6 +109,10 @@ let Vety = new Vue({
     mounted: function() {
         let _t = this
         _t.isloading = false
+
+        // Send Prepare Signal
+        ipc.send('vetyLoaded')
+
         audioElement = document.getElementById("mainMusic")
         audioElement.addEventListener("timeupdate", () => {
             _t.player.nowTime = audioElement.currentTime
@@ -150,8 +154,6 @@ let Vety = new Vue({
                 _t.isdragging = false
             }
         })
-        $('.ui.accordion')
-            .accordion()
         $('.checkbox').checkbox()
         $('.vmenu .menuScroller').css({
             top: `${$(".vmenu a.active.item")[0].offsetTop+22.5}px`,
@@ -167,6 +169,7 @@ let Vety = new Vue({
         })
         setInterval(function() { _t.loadText = _t.usefulWords[Math.floor(Math.random() * _t.usefulWords.length)] }, 3000)
         _t.loadText = _t.usefulWords[Math.floor(Math.random() * 3)]
+
     },
     methods: {
         chatWithPyQt: function(c) {
@@ -343,6 +346,9 @@ document.getElementById('closebtn').addEventListener('click', () => {
 })
 ipc.on('mainWin-max', (_, status) => {
     Vety.isMax = status
+})
+ipc.on('getRecent', (_, ps) => {
+    Vety.infos.recentFiles = ps
 })
 ipc.on('loadParsed', (_, ps) => {
     //console.log(ps)
