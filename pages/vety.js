@@ -1,5 +1,5 @@
-let isLoading = true
 const ipc = require('electron').ipcRenderer
+const { shell } = require("electron")
 
 let Vety = new Vue({
     el: "#app",
@@ -81,6 +81,7 @@ let Vety = new Vue({
         isloading: true,
         isLoadingFile: false,
         isdragging: false,
+        dragCount: 0,
         filename: "",
         vetyBridge: {},
         playRates: [0.125, 0.25, 0.5, 1, 1.5, 2, 4, 8, 16],
@@ -108,36 +109,50 @@ let Vety = new Vue({
     mounted: function() {
         let _t = this
         _t.isloading = false
-            /*document.addEventListener("DOMContentLoaded", () => {
-                new QWebChannel(qt.webChannelTransport, (c) => {
-                    window.vetyBridge = c.objects.vety
-                    window.vetyBridge.value = "preload"
-                    window.vetyBridge.value = "get config"
-                    window.vetyBridge.value = "get recentFiles"
-                })
-            })*/
         audioElement = document.getElementById("mainMusic")
         audioElement.addEventListener("timeupdate", () => {
-                _t.player.nowTime = audioElement.currentTime
-                _t.playerPercent = _t.nowPercent()
-                console.log(_t.playerPercent, audioElement.duration)
-                if (_t.player.allTime != audioElement.duration) {
-                    _t.player.allTime = audioElement.duration
-                } else {
-                    _t.$refs.playerSlider.changePercent(_t.playerPercent)
-                }
-            })
-            //document.documentElement.oncontextmenu = function(e) {
-            //}
+            _t.player.nowTime = audioElement.currentTime
+            _t.playerPercent = _t.nowPercent()
+            console.log(_t.playerPercent, audioElement.duration)
+            if (_t.player.allTime != audioElement.duration) {
+                _t.player.allTime = audioElement.duration
+            } else {
+                _t.$refs.playerSlider.changePercent(_t.playerPercent)
+            }
+        })
         document.addEventListener("click", function() {
             let rm = document.getElementById("rightMenu")
             rm.style.display = "none"
         })
+        document.getElementById("app").addEventListener("drop", (e) => {
+            e.preventDefault()
+            _t.isdragging = false
+            _t.dragCount = 0
+            const files = e.dataTransfer.files
+            if (files) {
+                ipc.send('parseFile', files[0].path)
+            }
+        })
+        document.getElementById("app").addEventListener('dragover', (e) => {
+            e.preventDefault()
+        })
+        document.getElementById("app").addEventListener("dragenter", (e) => {
+            e.preventDefault()
+                //console.log("ENTER")
+            _t.dragCount++;
+            _t.isdragging = true
+        })
+        document.getElementById("app").addEventListener("dragleave", (e) => {
+            e.preventDefault()
+            _t.dragCount--;
+            if (!_t.dragCount) {
+                //console.log("LEAVE")
+                _t.isdragging = false
+            }
+        })
         $('.ui.accordion')
             .accordion()
         $('.checkbox').checkbox()
-            //$('.tabButton, .menu .item')
-            //    .tab();
         $('.vmenu .menuScroller').css({
             top: `${$(".vmenu a.active.item")[0].offsetTop+22.5}px`,
             height: "15px"
@@ -160,6 +175,17 @@ let Vety = new Vue({
         getTheme(g) {
             return this.preference.themes[this.preference.choosed][g]
         },
+        parseLink(url) {
+            let urlFC = url.split(":")
+            let res = ""
+            if (urlFC[0] == "github")
+                res = "https://github.com/"
+            res += urlFC[1]
+            return res
+        },
+        openLink(lk) {
+            shell.openExternal(this.parseLink(lk))
+        },
         changeTab: function(d) {
             let _t = this
             if (_t.menu.tabMenuItems[d].page != this.menu.chosenTab) {
@@ -168,11 +194,10 @@ let Vety = new Vue({
                 _t.menu.chosenTab = _t.menu.tabMenuItems[d].page
                 setTimeout(function() {
                     $(_t.$refs[_t.menu.tabMenuItems[d].page]).transition('fade up', '100ms')
-                }, 100)
+                }, 130)
             }
         },
         askFile: function() {
-            //console.log(ipc)
             ipc.send("parseFile", "")
         },
         getMusicName: function(p) {
@@ -200,7 +225,6 @@ let Vety = new Vue({
         openFile: function(fn) {
             let _t = this
             _t.filename = fn
-                //$('#loaderProgress').css("display", "block")
             _t.isLoadingFile = true
             $("#loader").css("display", "block")
             $(() => {
@@ -269,7 +293,6 @@ let Vety = new Vue({
         doUpdate: function() {
             for (let i in this.config)
                 this.config[i] = this.config[i]
-            this.chatWithPyQt("update " + JSON.stringify(this.config))
         },
         changePercent: function(v) {
             this.playFrom(this.player.allTime / 100 * v)
@@ -303,48 +326,7 @@ let Vety = new Vue({
         },
         exportMp3(q) {
             this.chatWithPyQt(`export ${this.cutResult.materials[q][0]} ${this.cutResult.materials[q][1]}`)
-        },
-        /*extendMusic(z) {
-            let _t = this
-            _t.player.disabled = true
-            _t.changeExtendMusic(`h${_t.customPage}t`)
-        },
-        changeExtendMusic(p) {
-            let _t = this
-            if (p.length <= 0) {
-                _t.player.disabled = false
-                $(() => {
-                    $("#mainMusic").attr("src", _t.filename)
-                    let vety_audio = $("#mainMusic").get('0')
-                    $("#mainMusic").get('0').pause()
-                    _t.status = 0
-                    _t.player.nowTime = 0
-                    vety_audio.load()
-                    _t.play()
-                })
-                _t.play()
-                return
-            }
-            let musicName = "../extend/"
-            if (p[0] == "h")
-                musicName += "head.mp3"
-            else if (p[0] == "t")
-                musicName += "tail.mp3"
-            else
-                musicName += p[0] + ".mp3"
-            $(() => {
-                $("#mainMusic").attr("src", musicName)
-                let vety_audio = $("#mainMusic").get('0')
-                $("#mainMusic").get('0').pause()
-                _t.status = 0
-                _t.player.nowTime = 0
-                vety_audio.load()
-                _t.play()
-                vety_audio.onended = () => {
-                    _t.changeExtendMusic(p.slice(1))
-                }
-            })
-        }*/
+        }
     },
     components: {
         vetyProgress

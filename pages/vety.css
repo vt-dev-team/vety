@@ -3,6 +3,22 @@
     src: url('./statics/fonts/ssjhxt.ttf');
 }
 
+@keyframes fadeIn {
+    0% {
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+.fadeInOut {
+    animation-name: fadeIn;
+    animation-timing-function: cubic-bezier(0.05, 0.63, 0.57, 1);
+    animation-direction: normal;
+    animation-play-state: running;
+}
+
 html,
 body,
 #app {
@@ -124,6 +140,18 @@ body,
 
 .player .right.column {
     padding-left: 10px !important;
+}
+
+.vetyNoInfo {
+    background: none !important;
+    border: none !important;
+    padding: 1em 1em;
+    width: 100%;
+    text-align: center;
+}
+
+.vetyNoInfo .vetyHeader {
+    color: rgba(200, 200, 200, .77) !important;
 }
 
 .vmenu {
