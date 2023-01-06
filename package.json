@@ -3,9 +3,38 @@
     "version": "2.0.0",
     "description": "Vety Ng",
     "main": "main.js",
+    "build": {
+        "appId": "vety",
+        "productName": "Vety",
+        "directories": {
+            "output": "build"
+        },
+        "asar": true,
+        "win": {
+            "icon": "./logo.ico",
+            "target": [{
+                "target": "nsis"
+            }]
+        },
+        "extraFiles": {
+            "from": "./bin/",
+            "to": "bin"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowElevation": true,
+            "allowToChangeInstallationDirectory": true,
+            "installerIcon": "./logo.ico",
+            "installerHeaderIcon": "./logo.ico",
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "Vety"
+        }
+    },
     "scripts": {
         "start": "electron .",
-        "package": "electron-packager . --overwrite --platform=win32 --arch=ia32 --out=out --asar --icon=logo.ico"
+        "package": "electron-packager . --overwrite --platform=win32 --arch=ia32 --out=out --asar --icon=logo.ico",
+        "build": "electron-builder --win --ia32"
     },
     "keywords": [
         "Electron",
@@ -17,12 +46,12 @@
     "author": "yemaster",
     "license": "GPL-3.0-or-later",
     "devDependencies": {
-        "electron": "^16.0.6"
+        "electron": "^16.0.6",
+        "electron-builder": "^23.6.0",
+        "electron-rebuild": "^3.2.5"
     },
     "dependencies": {
         "@electron/remote": "^2.0.1",
-        "electron-packager": "^15.2.0",
-        "electron-rebuild": "^3.2.5",
         "electron-store": "^8.1.0"
     }
 }

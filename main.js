@@ -40,6 +40,9 @@ function createWindow() {
     ipcMain.on('window-close', function() {
         mainWindow.close();
     })
+    ipcMain.on('window-reload', function() {
+        mainWindow.reload();
+    })
     ipcMain.on('parseFile', (_, fn) => {
         //console.log("GET", fn)
         if (!fn) {
@@ -95,7 +98,11 @@ function createWindow() {
         mainWindow.webContents.executeJavaScript("Vety.openFile('" + fn + "')")
         exec('"bin\\vetyCli.exe" ' + fn + ' -simple', (e, stdout, stderr) => {
             //console.log(stdout)
-            mainWindow.webContents.send("loadParsed", stdout)
+            if (e) {
+                mainWindow.webContents.send('mes', 'error', '', `执行vetyCli时出现错误${e}`)
+            } else {
+                mainWindow.webContents.send("loadParsed", stdout)
+            }
             mainWindow.webContents.executeJavaScript(`Vety.finishLoadFile()`)
         })
     }

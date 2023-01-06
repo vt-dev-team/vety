@@ -17,10 +17,10 @@
 
 <body>
     <div id="app">
-        <div class="ui active inverted dimmer" v-show="isLoadingFile" style="backdrop-filter: blur(3px)">
+        <div class="ui active inverted dimmer fadeIn" v-show="isLoadingFile" style="backdrop-filter: blur(3px)">
             <div class="ui text elastic inline loader" :class="getTheme('primary')">{{ loadText }}</div>
         </div>
-        <div class="ui active inverted dimmer vetyDraggerContent fadeInOut" v-if="isdragging" style="backdrop-filter: blur(3px)">
+        <div class="ui active inverted dimmer vetyDraggerContent fadeIn" v-if="isdragging" style="backdrop-filter: blur(3px)">
             <h2 class="vetyHeader">松开文件开始解析</h2>
         </div>
         <div class="vRightMenu" id="rightMenu">
@@ -183,36 +183,9 @@
             </div>
             <div class='ui tab' ref='Settings'>
                 <h1 class="page-title">设置</h1>
-                <!--div class="ui form">
-                    <h3 class="ui horizontal left aligned divider header vetyHeader">
-                        <i class="cogs icon"></i>基础设置
-                            </h3>
-                            <div class="ui styled accordion">
-                                <div class="title">
-                                    <i class="dropdown icon"></i> 空白响度最值(单位:响度)
-                                </div>
-                                <div class="content">
-                                    <input type="number" v-model="config.maxZero" @change="chatWithPyQt('update config maxZero ' + config.maxZero)">
-                                </div>
-                                <div class="title">
-                                    <i class="dropdown icon"></i> 分割间距(单位:毫秒)
-                                </div>
-                                <div class="content">
-                                    <input type="number" v-model="config.zeroNums" @change="chatWithPyQt('update config zeroNums ' + config.zeroNums)">
-                                </div>
-                            </div>
-                            <h3 class="ui horizontal left aligned divider header vetyHeader">
-                                <i class="paint roller icon"></i>外观
-                            </h3>
-                            <div class="ui styled accordion">
-                                <div class="title">
-                                    <i class="dropdown icon"></i> 皮肤
-                                </div>
-                                <div class="content">
-                                    <input type="text" v-model="config.primaryColor" @change="chatWithPyQt('update config primaryColor ' + config.primaryColor)">
-                                </div>
-                            </div>
-                            </div-->
+                <div class="vetyCard">
+
+                </div>
             </div>
             <audio id="mainMusic" src="" type="audio/mp3" style="display: none" controls>
             </audio>
@@ -240,7 +213,10 @@
                     <button class="ui circular basic icon button " @click="playAbsolute(5) ">
                             <i class="angle right icon "></i>
                         </button>
-                    <span class="playRate">×{{playRates[nowRate]}}</span>
+                    <span class="playRate">
+                        <span class="vetyPlayRateCtrl" @click="addRate(-1)">&lt;&lt;</span> ×{{playRates[nowRate]}}
+                    <span class="vetyPlayRateCtrl" @click="addRate(1)">&gt;&gt;</span>
+                    </span>
                 </div>
             </div>
         </div>

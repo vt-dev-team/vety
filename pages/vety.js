@@ -27,22 +27,34 @@ let Vety = new Vue({
             "小提示：Ctrl+Shift+F/L可以倍速播放",
             "小提示：空格可以暂停/播放",
             "小提示：Ctrl+O可以快速打开文件",
-            "She was lovely.Then things changed.",
-            "One candle, unattended.Only ashesremain.",
-            "I leave.Dog panics.Furniture sale.",
-            "Imagined adulthood.Gained adulthood.Lost Imagination.",
-            "Cancer.Only three months left.Pregnant.",
-            "Nothing to declare.Much to remember.",
-            "New start.Newyou.Not you.",
-            "Relationshipexpires;leaves a bitter aftertaste.",
-            "She's his love;he's her wallet.",
-            "They livedhappily ever after.Separately.",
-            "First Friends.Then Lover.Lost both.",
-            "Two wives, one funeral.No tear",
-            "Tow lovers.One parachute.No survivors.",
-            "'I love you too,'she lied.",
-            "He loves her, they're just friends.",
-            "Fantasticweekend.Then he never called."
+            "Tears are a kind of emotional release.",
+            "Crazy miss, where are you.",
+            "As long as you live better than me, die early.",
+            "Love like an idiot, worth it?",
+            "I want to love my seal in your heart.",
+            "You are my life, I can't live without you.",
+            "Carrying my full memory, you're far away.",
+            "Not because of my persistence, but because you deserve it.",
+            "Happy to know how to share, to be more happy.",
+            "I will not beat you, you don't know me but.",
+            "Broken the promise of a place, put together not back yesterday.",
+            "Some things, do not say is a knot, say is a scar.",
+            "There is no love in my world, it's meant to be apart.",
+            "I just want to find a person I can manage.",
+            "A ray of sunshine in the morning, woke me from my sleep.",
+            "I just don't want to leave you, I don't want to.",
+            "If the outcome is bound to be sad, then I would rather choose to give up.",
+            "I gave it back to you, and I found it really easy.",
+            "The fickleness of the world I have to make myself disguised as a hedgehog.",
+            "I have heard the most ridiculous story, is you and her love.",
+            "Turning only to meet you, but you forget, you will turn.",
+            "I want to hold your hand, walk, escape from the planet.",
+            "The whole world can be yours, but you can only be mine.",
+            "I began to learn to imagine, the idea of a place where you and I.",
+            "Every second that you are touching, it's always in my life.",
+            "Time is not to let people forget the pain, it just makes people used to pain.",
+            "Tangle of love, is that you have to let me choose to smile to leave.",
+            "Whether it is to leave or to get together, always so painful."
         ],
         unibody: "window",
         isMax: false,
@@ -117,7 +129,7 @@ let Vety = new Vue({
         audioElement.addEventListener("timeupdate", () => {
             _t.player.nowTime = audioElement.currentTime
             _t.playerPercent = _t.nowPercent()
-            console.log(_t.playerPercent, audioElement.duration)
+                //console.log(_t.playerPercent, audioElement.duration)
             if (_t.player.allTime != audioElement.duration) {
                 _t.player.allTime = audioElement.duration
             } else {
@@ -132,6 +144,8 @@ let Vety = new Vue({
             e.preventDefault()
             _t.isdragging = false
             _t.dragCount = 0
+            if (_t.isLoadingFile)
+                return
             const files = e.dataTransfer.files
             if (files) {
                 ipc.send('parseFile', files[0].path)
@@ -143,6 +157,8 @@ let Vety = new Vue({
         document.getElementById("app").addEventListener("dragenter", (e) => {
             e.preventDefault()
                 //console.log("ENTER")
+            if (_t.isLoadingFile)
+                return
             _t.dragCount++;
             _t.isdragging = true
         })
@@ -169,7 +185,42 @@ let Vety = new Vue({
         })
         setInterval(function() { _t.loadText = _t.usefulWords[Math.floor(Math.random() * _t.usefulWords.length)] }, 3000)
         _t.loadText = _t.usefulWords[Math.floor(Math.random() * 3)]
-
+            // Key Listener
+        document.addEventListener("keydown", (e) => {
+            //console.log(e)
+            e.preventDefault()
+            let pressedKey = e.key.toUpperCase()
+            switch (pressedKey) {
+                case " ":
+                    _t.changeState()
+                    break
+                case "F":
+                    if (e.shiftKey && e.ctrlKey)
+                        _t.addRate(1)
+                    break
+                case "L":
+                    if (e.shiftKey && e.ctrlKey)
+                        _t.addRate(-1)
+                    break
+                case "O":
+                    if (e.ctrlKey)
+                        _t.askFile()
+                    break
+                case "R":
+                    if (e.ctrlKey)
+                        ipc.send("window-reload")
+                    break
+                case "F4":
+                    if (e.altKey)
+                        ipc.send("window-close")
+                    break
+                case "ARROWLEFT":
+                    _t.playAbsolute(-5)
+                    break
+                case "ARROWRIGHT":
+                    _t.playAbsolute(5)
+            }
+        })
     },
     methods: {
         chatWithPyQt: function(c) {
@@ -222,7 +273,7 @@ let Vety = new Vue({
             $("#mainMusic").get(0).playbackRate = _t.playRates[_t.nowRate]
             Toast.fire({
                 icon: 'info',
-                text: `${_t.playRates[_t.nowRate]}倍速`
+                text: `已开启${_t.playRates[_t.nowRate]}倍速`
             });
         },
         openFile: function(fn) {
@@ -243,11 +294,11 @@ let Vety = new Vue({
             let _t = this
             let q = JSON.parse(p)
             _t.cutResult = {
-                special_modes: q.s,
-                materials: q.m,
-                raw: q.r
-            }
-            console.log(this.cutResult)
+                    special_modes: q.s,
+                    materials: q.m,
+                    raw: q.r
+                }
+                //console.log(this.cutResult)
         },
         clearToLoad: function() {
             this.cutResult = {
@@ -328,7 +379,7 @@ let Vety = new Vue({
             return false;
         },
         exportMp3(q) {
-            this.chatWithPyQt(`export ${this.cutResult.materials[q][0]} ${this.cutResult.materials[q][1]}`)
+            //this.chatWithPyQt(`export ${this.cutResult.materials[q][0]} ${this.cutResult.materials[q][1]}`)
         }
     },
     components: {
