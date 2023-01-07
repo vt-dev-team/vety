@@ -18,15 +18,15 @@
 <body>
     <div id="app">
         <div class="ui active inverted dimmer fadeIn" v-show="isLoadingFile" style="backdrop-filter: blur(3px)">
-            <div class="ui text elastic inline loader" :class="getTheme('primary')">{{ loadText }}</div>
+            <div class="ui text elastic inline loader" :class="getTheme('primary')" style="max-width: 300px;">{{ loadText }}</div>
         </div>
-        <div class="ui active inverted dimmer vetyDraggerContent fadeIn" v-if="isdragging" style="backdrop-filter: blur(3px)">
+        <div class="ui active inverted dimmer vetyDraggerContent fadeIn" v-if="dragCount>0" style="backdrop-filter: blur(3px)">
             <h2 class="vetyHeader">松开文件开始解析</h2>
         </div>
         <div class="vRightMenu" id="rightMenu">
             <ul>
                 <li><a href="javascript:;" @click="playFrom(cutResult.materials[chooseEle][0] / 1000)">播放</a></li>
-                <li><a href="javascript:;" @click="exportMp3(chooseEle)">导出为mp3</a></li>
+                <!--li><a href="javascript:;" @click="exportMp3(chooseEle)">导出为mp3</a></li-->
             </ul>
         </div>
         <div class="ui left fixed vertical icon borderless menu vmenu" :class="getTheme('primary')">
@@ -69,7 +69,9 @@
                         <tbody>
                             <tr v-for="(rcf,rcid) in reverseRecentFiles">
                                 <td class="selectable listItem">
-                                    <a class="listCloseBtn" @click="ipc.send('clearRecent', rcid)"><i class="icon iconfont icon-24gl-cross"></i></a>
+                                    <a class="listCloseBtn" @click="ipc.send('clearRecent', rcid)">
+                                        <i class="icon iconfont icon-24gl-cross"></i>
+                                    </a>
                                     <a class="item" @click="ipc.send('parseFile', rcf)">
                                     {{ rcf }}</a>
                                 </td>
@@ -173,11 +175,13 @@
                 </div>
                 <div class="vetyCard">
                     <h3 class="vetyHeader">更多链接</h3>
-                    <div class="ui homebtn white labeled icon button" @click="openLink('github:vt-dev-team/vety')">
+                    <div class="ui homebtn white labeled icon button vTooltip" @click="openLink('github:vt-dev-team/vety')">
                         <i class="icon github"></i> vety
+                        <span class="vTooltiptext">打开链接</span>
                     </div>
-                    <div class="ui homebtn white labeled icon button" @click="openLink('github:yemaster')">
+                    <div class="ui homebtn white labeled icon button vTooltip" @click="openLink('github:yemaster')">
                         <i class="icon github"></i> yemaster
+                        <span class="vTooltiptext">打开链接</span>
                     </div>
                 </div>
             </div>
@@ -201,8 +205,9 @@
                     </span>
                 </div>
                 <div style="text-align:center; width: 100%; " :class="{ 'controler-disabled':player.disabled }">
-                    <button class="ui circular basic icon button " @click="playAbsolute(-5) ">
+                    <button class="ui circular basic icon button vTooltip" @click="playAbsolute(-5) ">
                             <i class="angle left icon "></i>
+                            <span class="vTooltiptext">后退5秒</span>
                         </button>
                     <button class="ui circular basic icon button " :class="getTheme('primary') " @click="play() " v-if="status==0 ">
                             <i class="play icon "></i>
@@ -210,8 +215,9 @@
                     <button class="ui circular basic icon button " :class="getTheme('primary') " @click="stop() " v-else-if="status==1 ">
                             <i class="pause icon "></i>
                         </button>
-                    <button class="ui circular basic icon button " @click="playAbsolute(5) ">
+                    <button class="ui circular basic icon button vTooltip" @click="playAbsolute(5) ">
                             <i class="angle right icon "></i>
+                            <span class="vTooltiptext">前进5秒</span>
                         </button>
                     <span class="playRate">
                         <span class="vetyPlayRateCtrl" @click="addRate(-1)">&lt;&lt;</span> ×{{playRates[nowRate]}}

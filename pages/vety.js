@@ -6,7 +6,7 @@ let Vety = new Vue({
     data: {
         app: {
             name: 'Vety',
-            version: '2.0.0',
+            version: '2.0.1',
             coreVersion: '1.3.2',
             cliVersion: '1.0.1',
             author: 'yemaster',
@@ -56,7 +56,6 @@ let Vety = new Vue({
             "Tangle of love, is that you have to let me choose to smile to leave.",
             "Whether it is to leave or to get together, always so painful."
         ],
-        unibody: "window",
         isMax: false,
         menu: {
             tabMenuItems: [{
@@ -83,19 +82,15 @@ let Vety = new Vue({
         },
         config: {
             maxZero: 5,
-            zeroNums: 3200,
-            primaryColor: 'primary',
-            standardFile: 'standard.vety'
+            zeroNums: 3200
         },
-        ismax: false,
         loadText: "加载中",
         useExperienceCutName: true,
         isloading: true,
         isLoadingFile: false,
-        isdragging: false,
         dragCount: 0,
+        isOpenContext: false,
         filename: "",
-        vetyBridge: {},
         playRates: [0.125, 0.25, 0.5, 1, 1.5, 2, 4, 8, 16],
         nowRate: 3,
         cutResult: {
@@ -136,13 +131,13 @@ let Vety = new Vue({
                 _t.$refs.playerSlider.changePercent(_t.playerPercent)
             }
         })
-        document.addEventListener("click", function() {
-            let rm = document.getElementById("rightMenu")
-            rm.style.display = "none"
-        })
+
+        // Right Menu
+        document.addEventListener("click", _t.closeContextMenu)
+
+        // Drag
         document.getElementById("app").addEventListener("drop", (e) => {
             e.preventDefault()
-            _t.isdragging = false
             _t.dragCount = 0
             if (_t.isLoadingFile)
                 return
@@ -160,15 +155,10 @@ let Vety = new Vue({
             if (_t.isLoadingFile)
                 return
             _t.dragCount++;
-            _t.isdragging = true
         })
         document.getElementById("app").addEventListener("dragleave", (e) => {
             e.preventDefault()
-            _t.dragCount--;
-            if (!_t.dragCount) {
-                //console.log("LEAVE")
-                _t.isdragging = false
-            }
+            _t.dragCount--
         })
         $('.checkbox').checkbox()
         $('.vmenu .menuScroller').css({
@@ -214,6 +204,9 @@ let Vety = new Vue({
                     if (e.altKey)
                         ipc.send("window-close")
                     break
+                case "F12":
+                    ipc.send("window-debug")
+                    break
                 case "ARROWLEFT":
                     _t.playAbsolute(-5)
                     break
@@ -223,9 +216,6 @@ let Vety = new Vue({
         })
     },
     methods: {
-        chatWithPyQt: function(c) {
-            window.vetyBridge.value = c
-        },
         getTheme(g) {
             return this.preference.themes[this.preference.choosed][g]
         },
@@ -252,6 +242,8 @@ let Vety = new Vue({
             }
         },
         askFile: function() {
+            if (this.isLoadingFile)
+                return
             ipc.send("parseFile", "")
         },
         getMusicName: function(p) {
@@ -357,25 +349,38 @@ let Vety = new Vue({
             else
                 return this.player.nowTime / this.player.allTime * 100
         },
+
+        // Context Menu
+        closeContextMenu() {
+            let _t = this
+            if (_t.isOpenContext) {
+                $("#rightMenu").transition(`slide ${_t.isOpenContext} out`)
+                _t.isOpenContext = false
+            }
+        },
         showContextMenu(q, e) {
             let _t = this
             _t.chooseEle = q
             let rm = document.getElementById("rightMenu")
-            rm.style.display = "block"
             let mx = e.clientX;
             let my = e.clientY;
             let rmWidth = rm.offsetWidth;
             let rmHeight = rm.offsetHeight;
             let pageWidth = document.documentElement.clientWidth;
-            let pageHeight = document.documentElement.clientHeight - 100;
+            let pageHeight = document.documentElement.clientHeight - 120;
             if ((mx + rmWidth) < pageWidth)
                 rm.style.left = mx + "px";
             else
                 rm.style.left = mx - rmWidth + "px";
-            if ((my + rmHeight) < pageHeight)
-                rm.style.top = my + "px";
-            else
-                rm.style.top = my - rmHeight + "px";
+            if ((my + rmHeight) < pageHeight) {
+                rm.style.top = my + "px"
+                _t.isOpenContext = "down"
+                $("#rightMenu").transition("slide down in", "200ms")
+            } else {
+                rm.style.top = my - rmHeight + "px"
+                _t.isOpenContext = "up"
+                $("#rightMenu").transition("slide up in", "200ms")
+            }
             return false;
         },
         exportMp3(q) {
@@ -402,7 +407,6 @@ ipc.on('getRecent', (_, ps) => {
     Vety.infos.recentFiles = ps
 })
 ipc.on('loadParsed', (_, ps) => {
-    //console.log(ps)
     Vety.loadMaterial(ps)
 })
 ipc.on('mes', (_, ic, ti, ms) => {

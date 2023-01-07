@@ -1,11 +1,10 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Menu, ipcMain, dialog, ipcRenderer } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const { exec } = require('child_process')
 const fs = require("fs")
 const path = require('path')
 const Store = require("electron-store")
 const store = new Store()
-require('@electron/remote/main').initialize()
 
 function createWindow() {
     // Create the browser window.
@@ -17,7 +16,6 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         },
         icon: path.join(__dirname, './logo.ico')
@@ -25,8 +23,6 @@ function createWindow() {
 
     // and load the index.html of the app.
     mainWindow.loadFile('./pages/index.html')
-    require("@electron/remote/main").enable(mainWindow.webContents)
-        //登录窗口最小化
     ipcMain.on('window-min', function() {
         mainWindow.minimize();
     })
@@ -42,6 +38,9 @@ function createWindow() {
     })
     ipcMain.on('window-reload', function() {
         mainWindow.reload();
+    })
+    ipcMain.on('window-debug', function() {
+        mainWindow.webContents.toggleDevTools();
     })
     ipcMain.on('parseFile', (_, fn) => {
         //console.log("GET", fn)
@@ -67,11 +66,13 @@ function createWindow() {
     mainWindow.on('unmaximize', () => {
         mainWindow.webContents.send('mainWin-max', false)
     })
-    let recent = []
-    if (store.get("recentFiles"))
-        recent = store.get("recentFiles")
+    let recent = store.get("recentFiles") || []
     ipcMain.on('vetyLoaded', () => {
         mainWindow.webContents.send("getRecent", recent)
+    })
+    ipcMain.on('getSettings', () => {
+        let vetySettings = store.get("settings") || {}
+        mainWindow.webContents.send("getRecent", vetySettings)
     })
     ipcMain.on('clearRecent', (_, d) => {
         recent.splice(recent.length - d - 1, 1)
@@ -96,10 +97,10 @@ function createWindow() {
         fn = fn.replace(/\\/g, "\\\\")
         mainWindow.webContents.executeJavaScript("Vety.changeTab(1); Vety.clearToLoad();")
         mainWindow.webContents.executeJavaScript("Vety.openFile('" + fn + "')")
-        exec('"bin\\vetyCli.exe" ' + fn + ' -simple', (e, stdout, stderr) => {
+        exec('"bin\\vetyCli.exe" "' + fn + '" -simple', (e, stdout, stderr) => {
             //console.log(stdout)
             if (e) {
-                mainWindow.webContents.send('mes', 'error', '', `执行vetyCli时出现错误${e}`)
+                mainWindow.webContents.send('mes', 'error', '执行vetyCli时出现错误', `${e}`)
             } else {
                 mainWindow.webContents.send("loadParsed", stdout)
             }

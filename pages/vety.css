@@ -292,7 +292,7 @@ body,
     border-radius: 10px;
     background-color: var(--primaryColor);
     box-shadow: 0 4px 8px #2185d020;
-    transition: all .8s cubic-bezier(0.95, 0.1, 0.05, 0.9);
+    transition: all .6s cubic-bezier(0.95, 0.1, 0.05, 0.9);
     z-index: 200;
 }
 
@@ -437,6 +437,10 @@ td.abandoned {
     color: #aaa;
 }
 
+.playRate:hover {
+    color: #212121;
+}
+
 .vetyPlayRateCtrl {
     cursor: pointer;
     opacity: 0;
@@ -455,12 +459,12 @@ td.abandoned {
     position: relative !important;
 }
 
-.listCloseBtn:hover {
-    color: #218bd0 !important;
-}
-
 .listItem:hover .listCloseBtn {
     opacity: 1;
+}
+
+.listCloseBtn:hover {
+    color: #212121 !important;
 }
 
 .listCloseBtn {
@@ -469,6 +473,35 @@ td.abandoned {
     top: 0;
     right: 0;
     opacity: 0;
-    color: #aaa;
+    color: #ccc !important;
     transition: all .2s;
+}
+
+.vTooltip {
+    position: relative;
+}
+
+.vTooltip .vTooltiptext {
+    visibility: hidden;
+    width: 80px;
+    background-color: #212223;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    font-size: 12px;
+    margin-bottom: 0px;
+    margin-left: -40px;
+    opacity: 0;
+    transition: opacity .12s ease-in-out, margin-bottom .1s ease-in-out;
+}
+
+.vTooltip:hover .vTooltiptext {
+    margin-bottom: 5px;
+    visibility: visible;
+    opacity: 1;
 }
